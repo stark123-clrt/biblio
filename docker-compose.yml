@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Service PHP avec Apache
+  php-apache:
+    build:
+      context: .  # Utiliser le Dockerfile présent dans le répertoire courant
+      dockerfile: Dockerfile  # Spécifier le nom du Dockerfile
+    container_name: php-apache
+    ports:
+      - "8082:80"  # Le port 8082 pour accéder à l'application
+    volumes:
+      - ./:/var/www/html/  # Montre le répertoire actuel du projet dans le conteneur
+    networks:
+      - mynetwork
+
+  # Service MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - mynetwork
+
+  # Service PHPMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - "8083:80"  # Accéder à PHPMyAdmin via le port 8083
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    networks:
+      - mynetwork
+
+# Volumes pour persister les données
+volumes:
+  mysql-data:
+
+# Réseau personnalisé pour les services
+networks:
+  mynetwork:
+    driver: bridge
