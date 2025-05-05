@@ -144,35 +144,146 @@ $page_title = "Mon Profil";
 include "../includes/header.php";
 ?>
 
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6">Mon Profil</h1>
+<!-- Script pour initialiser le mode sombre correctement -->
+<script>
+    // Applique immédiatement le thème sombre si nécessaire
+    (function() {
+        if (localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    })();
+</script>
+
+<!-- Style personnalisé -->
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
     
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f8fafc;
+    }
+    
+    .profile-card {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+        position: relative;
+    }
+    
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .empty-state {
+        background: linear-gradient(135deg, #f6f9fc 0%, #eef2f5 100%);
+        border-radius: 16px;
+    }
+    
+    /* Animation pour les cartes */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .profile-card {
+        animation: fadeIn 0.5s ease forwards;
+    }
+    
+    /* Style pour le dark mode */
+    .dark .profile-card {
+        background: #1e293b;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .dark .profile-card input,
+    .dark .profile-card textarea,
+    .dark .profile-card select {
+        background-color: #334155;
+        border-color: #475569;
+        color: #f8fafc;
+    }
+    
+    .dark .profile-card input::placeholder,
+    .dark .profile-card textarea::placeholder {
+        color: #94a3b8;
+    }
+    
+    .dark .empty-state {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    }
+</style>
+
+
+<!-- Script pour initialiser le mode sombre correctement -->
+<script>
+    // Applique immédiatement le thème sombre si nécessaire
+    (function() {
+        if (localStorage.getItem('theme') === 'dark' || 
+            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    })();
+</script>
+
+<div class="container mx-auto px-4 py-8">
+    <!-- Header avec titre et boutons -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+        <div class="mb-4 md:mb-0">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white">Mon Profil</h1>
+            <p class="text-gray-600 dark:text-gray-300">Gérez vos informations personnelles et vos préférences</p>
+        </div>
+    </div>
+    
+    <!-- Messages d'alerte -->
     <?php if (!empty($success_message)): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            <?php echo $success_message; ?>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded-md dark:bg-green-900 dark:text-green-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="font-medium"><?php echo $success_message; ?></p>
+                </div>
+            </div>
         </div>
     <?php endif; ?>
     
     <?php if (!empty($error_message)): ?>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <?php echo $error_message; ?>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md dark:bg-red-900 dark:text-red-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="font-medium"><?php echo $error_message; ?></p>
+                </div>
+            </div>
         </div>
     <?php endif; ?>
     
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Informations et statistiques -->
         <div class="lg:col-span-1">
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <!-- Profil -->
+            <div class="profile-card bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
                 <div class="text-center mb-6">
                     <?php if (!empty($user['profile_picture'])): ?>
-                        <img src="<?php echo $user['profile_picture']; ?>" alt="Photo de profil" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-blue-100">
+                        <img src="<?php echo $user['profile_picture']; ?>" alt="Photo de profil" class="w-32 h-32 rounded-full mx-auto object-cover border-4 border-blue-100 dark:border-blue-900">
                     <?php else: ?>
-                        <div class="w-32 h-32 rounded-full bg-blue-100 flex items-center justify-center mx-auto border-4 border-blue-200">
-                            <span class="text-4xl text-blue-800"><?php echo strtoupper(substr($user['username'], 0, 1)); ?></span>
+                        <div class="w-32 h-32 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mx-auto border-4 border-blue-200 dark:border-blue-800">
+                            <span class="text-4xl text-blue-800 dark:text-blue-200"><?php echo strtoupper(substr($user['username'], 0, 1)); ?></span>
                         </div>
                     <?php endif; ?>
-                    <h2 class="text-xl font-bold mt-4"><?php echo htmlspecialchars($user['username']); ?></h2>
-                    <p class="text-gray-600">
+                    <h2 class="text-xl font-bold mt-4 text-gray-800 dark:text-white"><?php echo htmlspecialchars($user['username']); ?></h2>
+                    <p class="text-gray-600 dark:text-gray-400">
                         <?php 
                             $full_name = trim($user['first_name'] . ' ' . $user['last_name']);
                             echo !empty($full_name) ? htmlspecialchars($full_name) : 'Membre';
@@ -180,24 +291,24 @@ include "../includes/header.php";
                     </p>
                 </div>
                 
-                <div class="border-t pt-4">
-                    <h3 class="font-bold mb-4">Mes informations</h3>
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <h3 class="font-bold mb-4 text-gray-800 dark:text-white">Mes informations</h3>
                     <div class="space-y-3">
                         <div>
-                            <span class="text-gray-500">Email:</span>
-                            <span class="font-semibold"><?php echo htmlspecialchars($user['email']); ?></span>
+                            <span class="text-gray-500 dark:text-gray-400">Email:</span>
+                            <span class="font-semibold text-gray-800 dark:text-gray-200"><?php echo htmlspecialchars($user['email']); ?></span>
                         </div>
                         <div>
-                            <span class="text-gray-500">Rôle:</span>
-                            <span class="font-semibold"><?php echo $user['role'] == 'admin' ? 'Administrateur' : 'Membre'; ?></span>
+                            <span class="text-gray-500 dark:text-gray-400">Rôle:</span>
+                            <span class="font-semibold text-gray-800 dark:text-gray-200"><?php echo $user['role'] == 'admin' ? 'Administrateur' : 'Membre'; ?></span>
                         </div>
                         <div>
-                            <span class="text-gray-500">Membre depuis:</span>
-                            <span class="font-semibold"><?php echo date('d/m/Y', strtotime($user['created_at'])); ?></span>
+                            <span class="text-gray-500 dark:text-gray-400">Membre depuis:</span>
+                            <span class="font-semibold text-gray-800 dark:text-gray-200"><?php echo date('d/m/Y', strtotime($user['created_at'])); ?></span>
                         </div>
                         <div>
-                            <span class="text-gray-500">Dernière connexion:</span>
-                            <span class="font-semibold">
+                            <span class="text-gray-500 dark:text-gray-400">Dernière connexion:</span>
+                            <span class="font-semibold text-gray-800 dark:text-gray-200">
                                 <?php echo $user['last_login'] ? date('d/m/Y à H:i', strtotime($user['last_login'])) : 'Jamais'; ?>
                             </span>
                         </div>
@@ -205,8 +316,9 @@ include "../includes/header.php";
                 </div>
             </div>
             
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h3 class="font-bold mb-4">Statistiques</h3>
+            <!-- Statistiques -->
+            <div class="profile-card bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+                <h3 class="font-bold mb-4 text-gray-800 dark:text-white">Statistiques</h3>
                 
                 <?php
                     // Récupérer quelques statistiques
@@ -214,125 +326,159 @@ include "../includes/header.php";
                     $notes_count = $conn->query("SELECT COUNT(*) FROM notes WHERE user_id = $user_id")->fetchColumn();
                     $comments_count = $conn->query("SELECT COUNT(*) FROM comments WHERE user_id = $user_id")->fetchColumn();
                     $favorite_books = $conn->query("SELECT COUNT(*) FROM user_library WHERE user_id = $user_id AND is_favorite = 1")->fetchColumn();
+                    
+                    // Calcul du nombre de livres terminés
+                    $completed_books = 0;
+                    $stmt = $conn->prepare("
+                        SELECT b.*, ul.last_page_read 
+                        FROM user_library ul 
+                        JOIN books b ON ul.book_id = b.id 
+                        WHERE ul.user_id = :user_id
+                    ");
+                    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    
+                    foreach ($books as $book) {
+                        if (isset($book['pages_count']) && $book['pages_count'] > 0) {
+                            $progress = ($book['last_page_read'] / $book['pages_count']) * 100;
+                            if ($progress >= 99.5 || $book['last_page_read'] >= $book['pages_count']) {
+                                $completed_books++;
+                            }
+                        }
+                    }
                 ?>
                 
-                <div class="space-y-3">
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Livres dans ma bibliothèque:</span>
-                        <span class="font-semibold"><?php echo $books_count; ?></span>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-blue-600 dark:text-blue-300"><?php echo $books_count; ?></div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">Livres</div>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Notes prises:</span>
-                        <span class="font-semibold"><?php echo $notes_count; ?></span>
+                    <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-green-600 dark:text-green-300"><?php echo $completed_books; ?></div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">Terminés</div>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Commentaires postés:</span>
-                        <span class="font-semibold"><?php echo $comments_count; ?></span>
+                    <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-purple-600 dark:text-purple-300"><?php echo $notes_count; ?></div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">Notes</div>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="text-gray-600">Livres favoris:</span>
-                        <span class="font-semibold"><?php echo $favorite_books; ?></span>
+                    <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg text-center">
+                        <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-300"><?php echo $favorite_books; ?></div>
+                        <div class="text-xs text-gray-600 dark:text-gray-400">Favoris</div>
                     </div>
                 </div>
                 
-                <div class="mt-6 flex justify-around">
-                    <a href="my-library.php" class="text-blue-600 hover:text-blue-800">
-                        <i class="fas fa-books mr-1"></i> Ma bibliothèque
+                <div class="flex justify-around border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <a href="my-library.php" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
+                        <i class="fas fa-book-open mr-1"></i> Ma bibliothèque
                     </a>
-                    <a href="notes.php" class="text-blue-600 hover:text-blue-800">
+                    <a href="notes.php" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
                         <i class="fas fa-sticky-note mr-1"></i> Mes notes
                     </a>
-                    <a href="comments.php" class="text-blue-600 hover:text-blue-800">
-                        <i class="fas fa-comments mr-1"></i> Mes commentaires
+                    <a href="comments.php" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
+                        <i class="fas fa-comments mr-1"></i> Commentaires
                     </a>
                 </div>
             </div>
         </div>
-        
+
         <!-- Formulaires -->
         <div class="lg:col-span-2">
             <!-- Formulaire de mise à jour du profil -->
-            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h2 class="text-xl font-bold mb-6">Modifier mon profil</h2>
+            <div class="profile-card bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-white">Modifier mon profil</h2>
                 
                 <form method="POST" enctype="multipart/form-data">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label for="username" class="block text-gray-700 font-bold mb-2">Nom d'utilisateur <span class="text-red-500">*</span></label>
+                            <label for="username" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Nom d'utilisateur <span class="text-red-500">*</span></label>
                             <input type="text" id="username" name="username" 
                                   value="<?php echo htmlspecialchars($user['username']); ?>"
-                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                         </div>
                         
                         <div>
-                            <label for="email" class="block text-gray-700 font-bold mb-2">Email <span class="text-red-500">*</span></label>
+                            <label for="email" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Email <span class="text-red-500">*</span></label>
                             <input type="email" id="email" name="email" 
                                   value="<?php echo htmlspecialchars($user['email']); ?>"
-                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                         </div>
                         
                         <div>
-                            <label for="first_name" class="block text-gray-700 font-bold mb-2">Prénom</label>
+                            <label for="first_name" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Prénom</label>
                             <input type="text" id="first_name" name="first_name" 
                                   value="<?php echo htmlspecialchars($user['first_name'] ?? ''); ?>"
-                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
                         
                         <div>
-                            <label for="last_name" class="block text-gray-700 font-bold mb-2">Nom</label>
+                            <label for="last_name" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Nom</label>
                             <input type="text" id="last_name" name="last_name" 
                                   value="<?php echo htmlspecialchars($user['last_name'] ?? ''); ?>"
-                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         </div>
                         
                         <div class="md:col-span-2">
-                            <label for="profile_picture" class="block text-gray-700 font-bold mb-2">Photo de profil</label>
-                            <input type="file" id="profile_picture" name="profile_picture" 
-                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  accept="image/jpeg,image/png,image/gif">
-                            <p class="text-sm text-gray-500 mt-1">Formats acceptés: JPG, PNG, GIF. Taille max: 2 Mo.</p>
+                            <label for="profile_picture" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Photo de profil</label>
+                            <div class="flex items-center space-x-4">
+                                <div class="w-16 h-16 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+                                    <?php if (!empty($user['profile_picture'])): ?>
+                                        <img src="<?php echo $user['profile_picture']; ?>" alt="Aperçu" class="w-full h-full object-cover">
+                                    <?php else: ?>
+                                        <div class="w-full h-full flex items-center justify-center text-gray-400">
+                                            <i class="fas fa-user text-2xl"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" id="profile_picture" name="profile_picture" 
+                                          class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                          accept="image/jpeg,image/png,image/gif">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Formats acceptés: JPG, PNG, GIF. Taille max: 2 Mo.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="flex justify-end">
                         <button type="submit" name="update_profile" 
-                               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                            Mettre à jour mon profil
+                               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            <i class="fas fa-save mr-2"></i> Mettre à jour mon profil
                         </button>
                     </div>
                 </form>
             </div>
             
             <!-- Formulaire de changement de mot de passe -->
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <h2 class="text-xl font-bold mb-6">Changer mon mot de passe</h2>
+            <div class="profile-card bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+                <h2 class="text-xl font-bold mb-6 text-gray-800 dark:text-white">Changer mon mot de passe</h2>
                 
                 <form method="POST">
                     <div class="space-y-4 mb-6">
                         <div>
-                            <label for="current_password" class="block text-gray-700 font-bold mb-2">Mot de passe actuel <span class="text-red-500">*</span></label>
+                            <label for="current_password" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Mot de passe actuel <span class="text-red-500">*</span></label>
                             <input type="password" id="current_password" name="current_password" 
-                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                         </div>
                         
                         <div>
-                            <label for="new_password" class="block text-gray-700 font-bold mb-2">Nouveau mot de passe <span class="text-red-500">*</span></label>
+                            <label for="new_password" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Nouveau mot de passe <span class="text-red-500">*</span></label>
                             <input type="password" id="new_password" name="new_password" 
-                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                            <p class="text-sm text-gray-500 mt-1">Minimum 6 caractères.</p>
+                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Minimum 6 caractères.</p>
                         </div>
                         
                         <div>
-                            <label for="confirm_password" class="block text-gray-700 font-bold mb-2">Confirmer le nouveau mot de passe <span class="text-red-500">*</span></label>
+                            <label for="confirm_password" class="block text-gray-700 dark:text-gray-300 font-bold mb-2">Confirmer le nouveau mot de passe <span class="text-red-500">*</span></label>
                             <input type="password" id="confirm_password" name="confirm_password" 
-                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                  class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
                         </div>
                     </div>
                     
                     <div class="flex justify-end">
                         <button type="submit" name="change_password" 
-                               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                            Changer mon mot de passe
+                               class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200">
+                            <i class="fas fa-key mr-2"></i> Changer mon mot de passe
                         </button>
                     </div>
                 </form>
@@ -340,5 +486,97 @@ include "../includes/header.php";
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+        // Gestion du bouton de mode sombre
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            // Supprime les gestionnaires d'événements existants
+            const newThemeToggle = themeToggle.cloneNode(true);
+            if (themeToggle.parentNode) {
+                themeToggle.parentNode.replaceChild(newThemeToggle, themeToggle);
+            }
+            
+            // Ajoute un nouveau gestionnaire d'événements
+            newThemeToggle.addEventListener('click', function() {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+                
+                // Mise à jour de l'icône
+                if (document.documentElement.classList.contains('dark')) {
+                    this.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    this.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+                
+                // Force le rafraîchissement des styles pour les éléments
+                document.body.classList.add('theme-transition');
+                setTimeout(() => {
+                    document.body.classList.remove('theme-transition');
+                }, 100);
+            });
+        }
+        
+        // Assurez-vous que l'icône du thème est correcte au chargement
+        function updateThemeIcon() {
+            if (themeToggle) {
+                if (document.documentElement.classList.contains('dark')) {
+                    themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+                } else {
+                    themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+                }
+            }
+        }
+        updateThemeIcon();
+        
+        // Aperçu de l'image de profil
+        const profilePictureInput = document.getElementById('profile_picture');
+        if (profilePictureInput) {
+            profilePictureInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Trouver l'élément d'aperçu
+                        const previewContainer = profilePictureInput.closest('div.md\\:col-span-2').querySelector('.w-16.h-16');
+                        if (previewContainer) {
+                            // Créer ou mettre à jour l'image d'aperçu
+                            let img = previewContainer.querySelector('img');
+                            if (!img) {
+                                previewContainer.innerHTML = '';
+                                img = document.createElement('img');
+                                img.className = 'w-full h-full object-cover';
+                                previewContainer.appendChild(img);
+                            }
+                            img.src = e.target.result;
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        
+        // Validation du formulaire de mot de passe
+        const passwordForm = document.querySelector('form[name="change_password"]');
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', function(e) {
+                const newPassword = document.getElementById('new_password').value;
+                const confirmPassword = document.getElementById('confirm_password').value;
+                
+                if (newPassword !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Les mots de passe ne correspondent pas.');
+                }
+            });
+        }
+        
+        // Animation pour les cartes
+        const profileCards = document.querySelectorAll('.profile-card');
+        profileCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script>
 
 <?php include "../includes/footer.php"; ?>

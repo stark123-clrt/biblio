@@ -80,92 +80,136 @@ $page_title = "Inscription";
 include "includes/header.php";
 ?>
 
-<div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md overflow-hidden mt-10 mb-10">
-    <div class="py-4 px-6 bg-blue-800 text-white text-center">
-        <h2 class="text-2xl font-bold">Créer un compte</h2>
-    </div>
-    
-    <div class="p-6">
-        <?php if(!empty($error)): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                <?php echo $error; ?>
-            </div>
-        <?php endif; ?>
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300">
+        <div class="py-4 px-6 bg-blue-800 dark:bg-gray-700 text-white text-center">
+            <h2 class="text-2xl font-bold">Créer un compte</h2>
+        </div>
         
-        <?php if(!empty($success)): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                <?php echo $success; ?>
-            </div>
-        <?php endif; ?>
-        
-        <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="username" class="block text-gray-700 font-bold mb-2">Nom d'utilisateur <span class="text-red-500">*</span></label>
-                    <input type="text" id="username" name="username" 
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                           value="<?php echo htmlspecialchars($form_data['username']); ?>" required>
+        <div class="p-6">
+            <?php if(!empty($error)): ?>
+                <div class="bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded mb-4">
+                    <?php echo $error; ?>
+                </div>
+            <?php endif; ?>
+            
+            <?php if(!empty($success)): ?>
+                <div class="bg-green-100 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 px-4 py-3 rounded mb-4">
+                    <?php echo $success; ?>
+                </div>
+            <?php endif; ?>
+            
+            <form method="POST" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="username" class="block text-gray-700 dark:text-gray-300 font-bold">
+                            Nom d'utilisateur <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="username" name="username" 
+                               class="shadow appearance-none border dark:border-gray-600 rounded w-full py-3 px-4 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                               value="<?php echo htmlspecialchars($form_data['username']); ?>" required>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="email" class="block text-gray-700 dark:text-gray-300 font-bold">
+                            Email <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email" id="email" name="email" 
+                               class="shadow appearance-none border dark:border-gray-600 rounded w-full py-3 px-4 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                               value="<?php echo htmlspecialchars($form_data['email']); ?>" required>
+                    </div>
                 </div>
                 
-                <div>
-                    <label for="email" class="block text-gray-700 font-bold mb-2">Email <span class="text-red-500">*</span></label>
-                    <input type="email" id="email" name="email" 
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                           value="<?php echo htmlspecialchars($form_data['email']); ?>" required>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="first_name" class="block text-gray-700 font-bold mb-2">Prénom</label>
-                    <input type="text" id="first_name" name="first_name" 
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                           value="<?php echo htmlspecialchars($form_data['first_name']); ?>">
-                </div>
-                
-                <div>
-                    <label for="last_name" class="block text-gray-700 font-bold mb-2">Nom</label>
-                    <input type="text" id="last_name" name="last_name" 
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                           value="<?php echo htmlspecialchars($form_data['last_name']); ?>">
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label for="password" class="block text-gray-700 font-bold mb-2">Mot de passe <span class="text-red-500">*</span></label>
-                    <input type="password" id="password" name="password" 
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                           required>
-                    <p class="text-gray-600 text-xs mt-1">Minimum 6 caractères</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="first_name" class="block text-gray-700 dark:text-gray-300 font-bold">Prénom</label>
+                        <input type="text" id="first_name" name="first_name" 
+                               class="shadow appearance-none border dark:border-gray-600 rounded w-full py-3 px-4 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                               value="<?php echo htmlspecialchars($form_data['first_name']); ?>">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="last_name" class="block text-gray-700 dark:text-gray-300 font-bold">Nom</label>
+                        <input type="text" id="last_name" name="last_name" 
+                               class="shadow appearance-none border dark:border-gray-600 rounded w-full py-3 px-4 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                               value="<?php echo htmlspecialchars($form_data['last_name']); ?>">
+                    </div>
                 </div>
                 
-                <div>
-                    <label for="confirm_password" class="block text-gray-700 font-bold mb-2">Confirmer le mot de passe <span class="text-red-500">*</span></label>
-                    <input type="password" id="confirm_password" name="confirm_password" 
-                           class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                           required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label for="password" class="block text-gray-700 dark:text-gray-300 font-bold">
+                            Mot de passe <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password" id="password" name="password" 
+                               class="shadow appearance-none border dark:border-gray-600 rounded w-full py-3 px-4 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                               required>
+                        <p class="text-gray-600 dark:text-gray-400 text-xs mt-1">Minimum 6 caractères</p>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label for="confirm_password" class="block text-gray-700 dark:text-gray-300 font-bold">
+                            Confirmer le mot de passe <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password" id="confirm_password" name="confirm_password" 
+                               class="shadow appearance-none border dark:border-gray-600 rounded w-full py-3 px-4 text-gray-700 dark:text-white dark:bg-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+                               required>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="mb-6">
-                <div class="flex items-center">
-                    <input type="checkbox" id="terms" name="terms" class="mr-2" required>
-                    <label for="terms" class="text-gray-700">J'accepte les <a href="#" class="text-blue-600 hover:text-blue-800">conditions d'utilisation</a> et la <a href="#" class="text-blue-600 hover:text-blue-800">politique de confidentialité</a></label>
+                
+                <div class="py-2">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="terms" name="terms" class="mr-2 h-4 w-4 text-blue-600 dark:text-blue-400 focus:ring-blue-500" required>
+                        <label for="terms" class="text-gray-700 dark:text-gray-300">
+                            J'accepte les <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">conditions d'utilisation</a> et la <a href="#" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline">politique de confidentialité</a>
+                        </label>
+                    </div>
                 </div>
-            </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="bg-blue-800 hover:bg-blue-900 dark:bg-blue-700 dark:hover:bg-blue-800 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 w-full transition-all duration-200 transform hover:scale-[1.02]">
+                        Créer mon compte
+                    </button>
+                </div>
+            </form>
             
-            <div class="text-center">
-                <button type="submit" class="bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full">
-                    Créer mon compte
-                </button>
+            <div class="mt-8 text-center">
+                <p class="text-gray-600 dark:text-gray-400">
+                    Vous avez déjà un compte? 
+                    <a href="login.php" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium">
+                        Connectez-vous
+                    </a>
+                </p>
             </div>
-        </form>
-        
-        <div class="mt-6 text-center">
-            <p class="text-gray-600">Vous avez déjà un compte? <a href="login.php" class="text-blue-600 hover:text-blue-800">Connectez-vous</a></p>
         </div>
     </div>
 </div>
+
+<style>
+    /* Animation de transition pour les champs du formulaire */
+    input, button {
+        transition: all 0.3s ease;
+    }
+    
+    input:focus {
+        transform: translateY(-2px);
+    }
+    
+    /* Améliorations de style pour les cases à cocher */
+    input[type="checkbox"] {
+        border-radius: 3px;
+        cursor: pointer;
+    }
+    
+    /* Style du curseur sur les boutons */
+    button {
+        cursor: pointer;
+    }
+    
+    /* Animation plus fluide pour les transitions du mode sombre */
+    .dark body, .dark * {
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+</style>
 
 <?php include "includes/footer.php"; ?>

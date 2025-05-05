@@ -4,11 +4,10 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Vérification admin désactivée temporairement pour débogage
-// if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-//     header("Location: ../login.php?message=unauthorized");
-//     exit();
-// }
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header("Location: ../login.php?message=unauthorized");
+    exit();
+}
 
 require_once "../config/database.php";
 
@@ -279,7 +278,7 @@ $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $page_title = "Gestion des utilisateurs - Administration";
 
 // Inclusion du header admin désactivée pour débogage
-// include "../includes/admin_header.php";
+include "../includes/header.php";
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -297,32 +296,7 @@ $page_title = "Gestion des utilisateurs - Administration";
 <body class="bg-gray-100 min-h-screen">
     <div class="flex flex-col min-h-screen">
         <!-- En-tête administrateur -->
-        <!-- <header class="bg-blue-800 text-white shadow-md">
-            <div class="container mx-auto px-4 py-4">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold">Administration - Bibliothèque Chrétienne</h1>
-                    
-                    <div class="flex items-center space-x-4">
-                        <a href="index.php" class="hover:text-blue-200">
-                            <i class="fas fa-tachometer-alt mr-1"></i> Tableau de bord
-                        </a>
-                        <a href="../index.php" class="hover:text-blue-200">
-                            <i class="fas fa-home mr-1"></i> Voir le site
-                        </a>
-                        <div class="relative group">
-                            <button class="flex items-center hover:text-blue-200">
-                                <i class="fas fa-user-circle mr-1"></i> Admin <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                            </button>
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-                                <a href="../logout.php" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                                    <i class="fas fa-sign-out-alt mr-1"></i> Déconnexion
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header> -->
+
 
         <div class="flex flex-grow">
             <!-- Menu latéral -->

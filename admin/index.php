@@ -6,10 +6,10 @@ if (session_status() == PHP_SESSION_NONE) {
 
 // Vérifier si l'utilisateur est un administrateur
 
-// if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-//     header("Location: ../login.php?message=unauthorized");
-//     exit();
-// }
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header("Location: ../login.php?message=unauthorized");
+    exit();
+}
 
 require_once "../config/database.php";
 
@@ -56,7 +56,7 @@ $stmt->execute();
 $most_read_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $page_title = "Tableau de bord - Administration";
-// include "../includes/admin_header.php";
+include "../includes/header.php";
 ?>
 
 

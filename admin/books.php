@@ -1,14 +1,17 @@
 <?php
+
+ini_set('upload_max_filesize', '6M');
+ini_set('post_max_size', '8M');
 // admin/books.php - Gestion des livres
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
 // Vérification admin désactivée temporairement pour débogage
-// if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-//     header("Location: ../login.php?message=unauthorized");
-//     exit();
-// }
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header("Location: ../login.php?message=unauthorized");
+    exit();
+}
 
 require_once "../config/database.php";
 
@@ -180,13 +183,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_book'])) {
                 $file_path = $stmt->fetchColumn();
             }
             
+            
             if (isset($_FILES['book_file']) && $_FILES['book_file']['size'] > 0) {
                 $file_tmp = $_FILES['book_file']['tmp_name'];
                 $file_name = $_FILES['book_file']['name'];
                 $file_ext = strtolower(pathinfo($file_name, PATHINFO_EXTENSION));
+                $file_type = $_FILES['book_file']['type'];
                 
-                if ($file_ext != 'pdf') {
-                    throw new Exception("Seuls les fichiers PDF sont acceptés.");
+                // Définition de la taille maximale à 6 Mo
+                $max_size = 6 * 1024 * 1024; // 6 Mo en octets
+                
+                // Afficher des informations de débogage (vous pouvez retirer cette partie plus tard)
+                error_log("Upload de fichier - Type: " . $file_type . ", Extension: " . $file_ext . ", Taille: " . $_FILES['book_file']['size'] . " octets, Erreur: " . $_FILES['book_file']['error']);
+                
+                // Vérification de la taille du fichier
+                if ($_FILES['book_file']['size'] > $max_size) {
+                    throw new Exception("Le fichier est trop volumineux. La taille maximale autorisée est de 6 Mo.");
+                }
+                
+                // Vérification plus souple du type de fichier (extension ou type MIME)
+                if ($file_ext != 'pdf' && strpos($file_type, 'pdf') === false && strpos($file_type, 'application/pdf') === false) {
+                    throw new Exception("Seuls les fichiers PDF sont acceptés. Votre fichier a l'extension ." . $file_ext . " et le type " . $file_type);
                 }
                 
                 $upload_dir = "../assets/uploads/books/";
@@ -204,10 +221,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_book'])) {
                     }
                     $file_path = $new_file_path;
                 } else {
-                    throw new Exception("Erreur lors du téléchargement du fichier.");
+                    // Message d'erreur plus détaillé
+                    $upload_error = $_FILES['book_file']['error'];
+                    $error_message = "";
+                    
+                    switch ($upload_error) {
+                        case UPLOAD_ERR_INI_SIZE:
+                            $error_message = "Le fichier dépasse la limite définie dans php.ini (upload_max_filesize).";
+                            break;
+                        case UPLOAD_ERR_FORM_SIZE:
+                            $error_message = "Le fichier dépasse la limite définie dans le formulaire HTML.";
+                            break;
+                        case UPLOAD_ERR_PARTIAL:
+                            $error_message = "Le fichier n'a été que partiellement téléchargé.";
+                            break;
+                        case UPLOAD_ERR_NO_TMP_DIR:
+                            $error_message = "Dossier temporaire manquant.";
+                            break;
+                        case UPLOAD_ERR_CANT_WRITE:
+                            $error_message = "Échec de l'écriture du fichier sur le disque.";
+                            break;
+                        case UPLOAD_ERR_EXTENSION:
+                            $error_message = "Une extension PHP a arrêté le téléchargement.";
+                            break;
+                        default:
+                            $error_message = "Erreur inconnue lors du téléchargement.";
+                    }
+                    
+                    throw new Exception("Erreur lors du téléchargement du fichier: " . $error_message);
                 }
             }
-            
+
             // Gestion de l'upload de la couverture
             $cover_image = null;
             if ($book_id) {
@@ -417,7 +461,7 @@ foreach ($books as $key => $book) {
 $page_title = "Gestion des livres - Administration";
 
 // Inclusion du header admin désactivée pour débogage
-// include "../includes/admin_header.php";
+include "../includes/header.php";
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -434,34 +478,7 @@ $page_title = "Gestion des livres - Administration";
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div class="flex flex-col min-h-screen">
-        <!-- En-tête administrateur -->
-        <header class="bg-blue-800 text-white shadow-md">
-            <div class="container mx-auto px-4 py-4">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold">Administration - Bibliothèque Chrétienne</h1>
-                    
-                    <div class="flex items-center space-x-4">
-                        <a href="index.php" class="hover:text-blue-200">
-                            <i class="fas fa-tachometer-alt mr-1"></i> Tableau de bord
-                        </a>
-                        <a href="../index.php" class="hover:text-blue-200">
-                            <i class="fas fa-home mr-1"></i> Voir le site
-                        </a>
-                        <div class="relative group">
-                            <button class="flex items-center hover:text-blue-200">
-                                <i class="fas fa-user-circle mr-1"></i> Admin <i class="fas fa-chevron-down ml-1 text-xs"></i>
-                            </button>
-                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden group-hover:block">
-                                <a href="../logout.php" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">
-                                    <i class="fas fa-sign-out-alt mr-1"></i> Déconnexion
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
+  
         <div class="flex flex-grow">
             <!-- Menu latéral -->
             <nav class="bg-gray-800 text-white w-64 p-4 hidden md:block">
