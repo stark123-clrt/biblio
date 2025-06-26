@@ -1,9 +1,37 @@
 <?php
-// index.php - Page d'accueil
+// index.php - Page d'accueil MODERNE
 require_once "config/database.php";
 
 // Mode SQL moins strict pour les GROUP BY (alternative temporaire)
 $conn->exec("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''))");
+
+// Récupérer les statistiques réelles de la base de données
+$stats = [
+    'total_books' => 0,
+    'total_users' => 0,
+    'total_categories' => 0,
+    'total_views' => 0
+];
+
+// Compter les livres
+$stmt = $conn->query("SELECT COUNT(*) FROM books");
+$stats['total_books'] = $stmt->fetchColumn();
+
+// Compter les utilisateurs
+$stmt = $conn->query("SELECT COUNT(*) FROM users");
+$stats['total_users'] = $stmt->fetchColumn();
+
+// Compter les catégories
+$stmt = $conn->query("SELECT COUNT(*) FROM categories");
+$stats['total_categories'] = $stmt->fetchColumn();
+
+// Compter les vues totales (si la colonne existe)
+try {
+    $stmt = $conn->query("SELECT SUM(COALESCE(views_count, 0)) FROM books");
+    $stats['total_views'] = $stmt->fetchColumn() ?: 0;
+} catch (Exception $e) {
+    $stats['total_views'] = 0;
+}
 
 // Récupérer les livres en vedette
 $stmt = $conn->prepare("SELECT b.*, c.name as category_name
@@ -54,438 +82,512 @@ include "includes/header.php";
 ?>
 
 <style>
-/* Styles pour le mode clair/sombre */
-:root {
-  --primary-blue: #2563eb;
-  --primary-blue-dark: #1d4ed8;
-  --bg-light: #ffffff;
-  --bg-light-alt: #f3f4f6;
-  --bg-dark: #111827;
-  --bg-dark-alt: #1f2937;
-  --card-light: #ffffff;
-  --card-dark: #1f2937;
-  --card-alt-light: #f9fafb;
-  --card-alt-dark: #374151;
-  --text-light: #374151;
-  --text-dark: #e5e7eb;
-  --text-light-secondary: #6b7280;
-  --text-dark-secondary: #9ca3af;
-  --border-light: #e5e7eb;
-  --border-dark: #374151;
-  --hover-light: #f3f4f6;
-  --hover-dark: #374151;
-  --yellow-star: #fbbf24;
-  --yellow-star-dark: #f59e0b;
-  --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-dark: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.18);
-  --shadow-hover-light: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-hover-dark: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+/* Styles modernes améliorés */
+.hero-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    overflow: hidden;
 }
 
-/* Transitions globales */
-body, .bg-white, .bg-gray-100, input, select, textarea, button, a, .card-item {
-  transition: all 0.3s ease;
+.hero-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.05)" points="0,1000 1000,0 1000,1000"/></svg>');
+    background-size: cover;
 }
 
-/* Bannière principale - mode sombre */
-.banner-area {
-  position: relative;
-  overflow: hidden;
+.dark .hero-gradient {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
 }
 
-.banner-area:before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, #1e3a8a, #1e40af);
-  z-index: 0;
+.glass-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-.dark .banner-area:before {
-  background: linear-gradient(45deg, #111827, #1f2937);
+.dark .glass-card {
+    background: rgba(31, 41, 55, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
-/* Adaptations du mode sombre */
-.dark .bg-white {
-  background-color: var(--card-dark);
-  color: var(--text-dark);
+.modern-card {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
 }
 
-.dark .bg-gray-100 {
-  background-color: var(--bg-dark-alt);
-  color: var(--text-dark);
+.modern-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
 }
 
-.dark .bg-gray-200 {
-  background-color: var(--card-alt-dark);
+.dark .modern-card:hover {
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
 }
 
-.dark .text-gray-500,
-.dark .text-gray-600 {
-  color: var(--text-dark-secondary);
+.category-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.dark .text-gray-400 {
-  color: #6b7280;
+.dark .category-card {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
 }
 
-.dark .text-blue-600 {
-  color: #60a5fa;
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+    transition: left 0.5s ease;
 }
 
-.dark .text-blue-800 {
-  color: #60a5fa;
+.category-card:hover::before {
+    left: 100%;
 }
 
-.dark .hover\:text-blue-800:hover {
-  color: #93c5fd;
+.btn-modern {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.dark .text-yellow-400 {
-  color: var(--yellow-star);
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
 }
 
-/* Cartes livres */
-.book-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  overflow: hidden;
+.btn-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
 }
 
-.book-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-hover-light);
+.btn-modern:hover::before {
+    left: 100%;
 }
 
-.dark .book-card:hover {
-  box-shadow: var(--shadow-hover-dark);
+.testimonial-modern {
+    position: relative;
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border-left: 4px solid transparent;
+    background-clip: padding-box;
 }
 
-/* Badges et catégories */
-.category-badge {
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+.dark .testimonial-modern {
+    background: linear-gradient(145deg, #374151 0%, #1f2937 100%);
 }
 
-.category-badge:after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: var(--primary-blue);
-  transform: scaleX(0);
-  transform-origin: bottom right;
-  transition: transform 0.3s ease;
-}
-
-.category-badge:hover:after {
-  transform: scaleX(1);
-  transform-origin: bottom left;
-}
-
-/* Testimonial cards */
-.testimonial-card {
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.testimonial-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-hover-light);
-}
-
-.dark .testimonial-card:hover {
-  box-shadow: var(--shadow-hover-dark);
-}
-
-.testimonial-card:before {
-  content: '"';
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 5rem;
-  line-height: 1;
-  opacity: 0.1;
-  font-family: serif;
-}
-
-/* Boutons */
-.btn {
-  position: relative;
-  overflow: hidden;
-}
-
-.btn:after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.3);
-  opacity: 0;
-  border-radius: 100%;
-  transform: scale(1, 1) translate(-50%);
-  transform-origin: 50% 50%;
-}
-
-.btn:focus:not(:active)::after {
-  animation: ripple 1s ease-out;
-}
-
-@keyframes ripple {
-  0% {
-    transform: scale(0, 0);
-    opacity: 0.5;
-  }
-  20% {
-    transform: scale(25, 25);
-    opacity: 0.3;
-  }
-  100% {
+.testimonial-modern::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
     opacity: 0;
-    transform: scale(40, 40);
-  }
+    transition: opacity 0.3s ease;
 }
 
-/* Custom animations */
-@keyframes fadeInUp {
-  from {
+.testimonial-modern:hover::before {
+    opacity: 1;
+}
+
+.floating-animation {
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-glow {
+    from { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+    to { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6); }
+}
+
+.slide-up-enter {
     opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-up-enter.visible {
     opacity: 1;
     transform: translateY(0);
-  }
 }
 
-.animate-fadeInUp {
-  animation: fadeInUp 0.5s ease-out forwards;
+.stats-counter {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    position: relative;
+    overflow: hidden;
 }
 
-/* Animation delay classes */
-.delay-100 { animation-delay: 0.1s; }
-.delay-200 { animation-delay: 0.2s; }
-.delay-300 { animation-delay: 0.3s; }
-.delay-400 { animation-delay: 0.4s; }
+.dark .stats-counter {
+    background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+}
+
+.stats-counter::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style>
 
-<!-- Bannière principale -->
-<div class="relative bg-blue-900 text-white banner-area">
-    <div class="absolute inset-0 bg-opacity-25"></div>
-    <div class="container mx-auto px-4 py-16 relative z-10">
-        <div class="max-w-2xl animate-fadeInUp">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Bibliothèque Chrétienne</h1>
-            <p class="text-xl mb-8 opacity-90">Découvrez une collection de livres chrétiens en ligne pour nourrir votre foi et approfondir vos connaissances spirituelles.</p>
-            <div class="flex flex-wrap gap-4">
-                <a href="library.php" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold btn transition-colors">
-                    <i class="fas fa-book-open mr-2"></i> Parcourir la bibliothèque
-                </a>
-                <?php if (!isset($_SESSION['user_id'])): ?>
-                    <a href="register.php" class="bg-white hover:bg-gray-100 text-blue-900 px-6 py-3 rounded-lg font-bold btn transition-colors dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-blue-400">
-                        <i class="fas fa-user-plus mr-2"></i> Créer un compte
-                    </a>
-                <?php endif; ?>
+<div class="min-h-screen">
+    <!-- Hero Section Moderne -->
+    <section class="hero-gradient min-h-screen flex items-center relative">
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <!-- Contenu texte -->
+                <div class="text-white">
+                    <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                        <span class="block">Bibliothèque</span>
+                        <span class="block bg-gradient-to-r from-yellow-400 to-orange-500 bg-clip-text text-transparent">
+                            Chrétienne
+                        </span>
+                    </h1>
+                    <p class="text-xl lg:text-2xl mb-8 opacity-90 leading-relaxed">
+                        Découvrez une collection exceptionnelle de livres spirituels pour nourrir votre foi et enrichir votre parcours spirituel.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="library.php" class="btn-modern text-white px-8 py-4 rounded-2xl font-bold text-lg inline-flex items-center justify-center">
+                            <i class="fas fa-book-open mr-3"></i> Explorer la bibliothèque
+                        </a>
+                        <?php if (!isset($_SESSION['user_id'])): ?>
+                            <a href="register.php" class="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-8 py-4 rounded-2xl font-bold text-lg inline-flex items-center justify-center transition-all duration-300 border border-white/30">
+                                <i class="fas fa-user-plus mr-3"></i> Rejoindre gratuitement
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Statistiques flottantes -->
+                <div class="lg:block hidden">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="stats-counter p-6 rounded-3xl text-center floating-animation">
+                            <div class="text-4xl font-bold mb-2 relative z-10" data-target="<?php echo $stats['total_books']; ?>"><?php echo $stats['total_books']; ?>+</div>
+                            <div class="text-white/80 relative z-10">Livres disponibles</div>
+                        </div>
+                        <div class="stats-counter p-6 rounded-3xl text-center floating-animation" style="animation-delay: -2s;">
+                            <div class="text-4xl font-bold mb-2 relative z-10" data-target="<?php echo $stats['total_users']; ?>"><?php echo $stats['total_users']; ?>+</div>
+                            <div class="text-white/80 relative z-10">Lecteurs inscrits</div>
+                        </div>
+                        <div class="stats-counter p-6 rounded-3xl text-center floating-animation" style="animation-delay: -4s;">
+                            <div class="text-4xl font-bold mb-2 relative z-10" data-target="<?php echo $stats['total_categories']; ?>"><?php echo $stats['total_categories']; ?>+</div>
+                            <div class="text-white/80 relative z-10">Catégories</div>
+                        </div>
+                        <div class="stats-counter p-6 rounded-3xl text-center floating-animation" style="animation-delay: -6s;">
+                            <div class="text-4xl font-bold mb-2 relative z-10" data-target="<?php echo $stats['total_views']; ?>"><?php echo number_format($stats['total_views']); ?>+</div>
+                            <div class="text-white/80 relative z-10">Lectures totales</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Livres en vedette -->
-<section class="py-12 bg-white dark:bg-gray-900">
-    <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold mb-8 dark:text-white flex items-center">
-            <i class="fas fa-star text-yellow-400 mr-3"></i> Livres en vedette
-        </h2>
         
-        <?php if (!empty($featuredBooks)): ?>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <?php foreach ($featuredBooks as $index => $book): ?>
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform book-card animate-fadeInUp delay-<?php echo ($index + 1) * 100; ?> dark:bg-gray-800">
-                        <a href="book.php?id=<?php echo $book['id']; ?>">
-                            <?php if (!empty($book['cover_image'])): ?>
-                                <img src="<?php echo $book['cover_image']; ?>" alt="<?php echo htmlspecialchars($book['title']); ?>" class="w-full h-64 object-cover">
-                            <?php else: ?>
-                                <div class="w-full h-64 bg-gray-200 flex items-center justify-center dark:bg-gray-700">
-                                    <i class="fas fa-book text-5xl text-gray-400 dark:text-gray-500"></i>
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
+            <i class="fas fa-chevron-down text-2xl opacity-60"></i>
+        </div>
+    </section>
+
+    <!-- Livres en vedette -->
+    <section class="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 slide-up-enter">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Livres en vedette
+                </h2>
+                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                    Découvrez notre sélection de livres spirituels soigneusement choisis pour enrichir votre parcours de foi
+                </p>
+            </div>
+            
+            <?php if (!empty($featuredBooks)): ?>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <?php foreach ($featuredBooks as $index => $book): ?>
+                        <div class="glass-card rounded-3xl overflow-hidden modern-card slide-up-enter" style="transition-delay: <?php echo $index * 0.1; ?>s">
+                            <a href="book.php?id=<?php echo $book['id']; ?>" class="block">
+                                <div class="relative overflow-hidden">
+                                    <?php if (!empty($book['cover_image'])): ?>
+                                        <?php
+                                        $featured_image_path = $book['cover_image'];
+                                        if (strpos($featured_image_path, '../') === 0) {
+                                            $featured_image_path = substr($featured_image_path, 3);
+                                        }
+                                        ?>
+                                        <img src="<?php echo htmlspecialchars($featured_image_path); ?>" 
+                                             alt="<?php echo htmlspecialchars($book['title']); ?>" 
+                                             class="w-full h-72 object-cover transition-transform duration-500 hover:scale-110"
+                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <div class="w-full h-72 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center" style="display:none;">
+                                            <i class="fas fa-book text-6xl text-gray-400 dark:text-gray-500"></i>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="w-full h-72 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+                                            <i class="fas fa-book text-6xl text-gray-400 dark:text-gray-500"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                    
+                                    <!-- Overlay avec gradient -->
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
+                                        <div class="absolute bottom-4 left-4 right-4">
+                                            <span class="bg-blue-500/80 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm">
+                                                <?php echo htmlspecialchars($book['category_name'] ?? 'Non catégorisé'); ?>
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                            <?php endif; ?>
-                            <div class="p-4">
-                                <div class="text-sm text-blue-600 mb-1 dark:text-blue-400"><?php echo htmlspecialchars($book['category_name'] ?? 'Non catégorisé'); ?></div>
-                                <h3 class="text-xl font-bold mb-2 dark:text-white"><?php echo htmlspecialchars($book['title']); ?></h3>
-                                <?php if (!empty($book['author'])): ?>
-                                    <p class="text-gray-600 dark:text-gray-400">par <?php echo htmlspecialchars($book['author']); ?></p>
-                                <?php endif; ?>
-                                <div class="mt-4 flex justify-end">
-                                    <span class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                                        En savoir plus <i class="fas fa-arrow-right ml-1"></i>
-                                    </span>
+                                
+                                <div class="p-6">
+                                    <h3 class="text-xl font-bold mb-3 text-gray-800 dark:text-white line-clamp-2">
+                                        <?php echo htmlspecialchars($book['title']); ?>
+                                    </h3>
+                                    <?php if (!empty($book['author'])): ?>
+                                        <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                            par <span class="font-medium"><?php echo htmlspecialchars($book['author']); ?></span>
+                                        </p>
+                                    <?php endif; ?>
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-blue-600 dark:text-blue-400 font-medium">En savoir plus</span>
+                                        <i class="fas fa-arrow-right text-blue-600 dark:text-blue-400 transform transition-transform group-hover:translate-x-2"></i>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="text-center py-12">
+                    <i class="fas fa-book text-6xl text-gray-400 mb-4"></i>
+                    <p class="text-xl text-gray-500 dark:text-gray-400">Aucun livre en vedette pour le moment.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
+
+    <!-- Catégories modernes -->
+    <section class="py-20 bg-white dark:bg-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 slide-up-enter">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-6 text-gray-800 dark:text-white">
+                    Explorez par <span class="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">catégorie</span>
+                </h2>
+                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                    Trouvez facilement les livres qui correspondent à vos centres d'intérêt spirituels
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <?php foreach ($categories as $index => $category): ?>
+                    <a href="category.php?id=<?php echo $category['id']; ?>" 
+                       class="category-card rounded-2xl p-8 text-center hover:scale-105 transition-all duration-300 slide-up-enter" 
+                       style="transition-delay: <?php echo $index * 0.1; ?>s">
+                        <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 text-white">
+                            <i class="fas fa-tag text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3 text-gray-800 dark:text-white">
+                            <?php echo htmlspecialchars($category['name']); ?>
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">
+                            <?php echo $category['book_count']; ?> livre<?php echo $category['book_count'] > 1 ? 's' : ''; ?> disponible<?php echo $category['book_count'] > 1 ? 's' : ''; ?>
+                        </p>
+                        <div class="inline-flex items-center text-blue-600 dark:text-blue-400 font-medium">
+                            Explorer <i class="fas fa-arrow-right ml-2"></i>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="library.php" class="btn-modern text-white px-8 py-4 rounded-2xl font-bold inline-flex items-center">
+                    <i class="fas fa-th-large mr-3"></i> Voir toutes les catégories
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Témoignages modernes -->
+    <?php if (!empty($testimonials)): ?>
+    <section class="py-20 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16 slide-up-enter">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-6 text-gray-800 dark:text-white">
+                    Ce que disent nos <span class="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">lecteurs</span>
+                </h2>
+                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                    Découvrez les témoignages authentiques de notre communauté de lecteurs passionnés
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <?php foreach ($testimonials as $index => $testimonial): ?>
+                    <div class="testimonial-modern rounded-2xl p-8 hover:scale-105 transition-all duration-300 slide-up-enter" 
+                         style="transition-delay: <?php echo $index * 0.1; ?>s">
+                        <!-- Étoiles -->
+                        <div class="flex justify-center mb-6">
+                            <div class="text-yellow-400 text-xl">
+                                <?php for ($i = 1; $i <= 5; $i++): ?>
+                                    <?php if ($i <= $testimonial['rating']): ?>
+                                        <i class="fas fa-star"></i>
+                                    <?php else: ?>
+                                        <i class="far fa-star"></i>
+                                    <?php endif; ?>
+                                <?php endfor; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- Citation -->
+                        <div class="relative mb-8">
+                            <i class="fas fa-quote-left text-4xl text-blue-500/20 absolute -top-2 -left-2"></i>
+                            <p class="text-gray-700 dark:text-gray-300 text-lg leading-relaxed italic pl-8">
+                                <?php echo htmlspecialchars($testimonial['comment_text']); ?>
+                            </p>
+                        </div>
+                        
+                        <!-- Auteur -->
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <div class="font-bold text-gray-800 dark:text-white text-lg">
+                                    <?php echo htmlspecialchars($testimonial['username']); ?>
+                                </div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    À propos de "<?php echo htmlspecialchars($testimonial['book_title']); ?>"
                                 </div>
                             </div>
-                        </a>
+                            <a href="book.php?id=<?php echo $testimonial['book_id']; ?>" 
+                               class="w-12 h-12 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center transition-colors">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>
-        <?php else: ?>
-            <div class="text-center text-gray-500 dark:text-gray-400">
-                <p>Aucun livre en vedette pour le moment.</p>
-            </div>
-        <?php endif; ?>
-    </div>
-</section>
-
-<!-- Catégories principales -->
-<section class="py-12 bg-gray-100 dark:bg-gray-800">
-    <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold mb-8 dark:text-white flex items-center">
-            <i class="fas fa-tags text-blue-600 dark:text-blue-500 mr-3"></i> Explorez par catégorie
-        </h2>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            <?php foreach ($categories as $index => $category): ?>
-                <a href="category.php?id=<?php echo $category['id']; ?>" 
-                   class="block bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow category-badge animate-fadeInUp delay-<?php echo ($index % 3 + 1) * 100; ?> dark:bg-gray-800 dark:text-white">
-                    <h3 class="text-xl font-bold mb-2"><?php echo htmlspecialchars($category['name']); ?></h3>
-                    <div class="flex justify-between items-end">
-                        <p class="text-gray-600 dark:text-gray-400"><?php echo $category['book_count']; ?> livre<?php echo $category['book_count'] > 1 ? 's' : ''; ?></p>
-                        <i class="fas fa-chevron-right text-blue-600 dark:text-blue-400"></i>
-                    </div>
+            
+            <div class="text-center mt-12">
+                <a href="testimonials.php" class="btn-modern text-white px-8 py-4 rounded-2xl font-bold inline-flex items-center">
+                    <i class="fas fa-comments mr-3"></i> Voir tous les témoignages
                 </a>
-            <?php endforeach; ?>
+            </div>
         </div>
-        
-        <div class="mt-8 text-center">
-            <a href="library.php" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold btn transition-colors">
-                <i class="fas fa-th-large mr-2"></i> Voir toutes les catégories
-            </a>
-        </div>
-    </div>
-</section>
+    </section>
+    <?php endif; ?>
 
-<!-- Derniers ajouts -->
-<section class="py-12 bg-white dark:bg-gray-900">
-    <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold mb-8 dark:text-white flex items-center">
-            <i class="fas fa-clock text-blue-600 dark:text-blue-500 mr-3"></i> Derniers ajouts
-        </h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <?php foreach ($recentBooks as $index => $book): ?>
-                <div class="flex bg-white rounded-lg shadow-md overflow-hidden h-32 hover:shadow-lg transition-shadow animate-fadeInUp delay-<?php echo ($index % 4 + 1) * 100; ?> dark:bg-gray-800">
-                    <?php if (!empty($book['cover_image'])): ?>
-                        <img src="<?php echo $book['cover_image']; ?>" alt="<?php echo htmlspecialchars($book['title']); ?>" class="w-24 h-full object-cover">
-                    <?php else: ?>
-                        <div class="w-24 h-full bg-gray-200 flex items-center justify-center dark:bg-gray-700">
-                            <i class="fas fa-book text-2xl text-gray-400 dark:text-gray-500"></i>
-                        </div>
-                    <?php endif; ?>
-                    <div class="flex-1 p-3 flex flex-col justify-between">
-                        <div>
-                            <h3 class="font-bold line-clamp-2 dark:text-white"><?php echo htmlspecialchars($book['title']); ?></h3>
-                            <div class="text-xs text-gray-600 dark:text-gray-400"><?php echo htmlspecialchars($book['category_name'] ?? 'Non catégorisé'); ?></div>
-                        </div>
-                        <a href="book.php?id=<?php echo $book['id']; ?>" class="text-blue-600 hover:text-blue-800 text-sm dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                            Détails <i class="fas fa-angle-right ml-1"></i>
-                        </a>
-                    </div>
+    <!-- CTA Final -->
+    <?php if (!isset($_SESSION['user_id'])): ?>
+    <section class="py-20 bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-black/20"></div>
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="max-w-4xl mx-auto slide-up-enter">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-6">
+                    Prêt à commencer votre <span class="text-yellow-400">voyage spirituel</span> ?
+                </h2>
+                <p class="text-xl lg:text-2xl mb-12 opacity-90 leading-relaxed">
+                    Rejoignez des milliers de lecteurs qui ont déjà transformé leur vie grâce à notre bibliothèque spirituelle
+                </p>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                    <a href="register.php" class="bg-white hover:bg-gray-100 text-blue-600 px-10 py-5 rounded-2xl font-bold text-xl transition-all duration-300 hover:scale-105 pulse-glow">
+                        <i class="fas fa-rocket mr-3"></i> Commencer gratuitement
+                    </a>
+                    <a href="library.php" class="border-2 border-white/30 hover:border-white text-white px-10 py-5 rounded-2xl font-bold text-xl transition-all duration-300 hover:bg-white/10">
+                        <i class="fas fa-eye mr-3"></i> Parcourir d'abord
+                    </a>
                 </div>
-            <?php endforeach; ?>
+            </div>
         </div>
-        
-        <div class="mt-8 text-center">
-            <a href="library.php" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold btn transition-colors">
-                <i class="fas fa-books mr-2"></i> Voir tous les livres
-            </a>
-        </div>
-    </div>
-</section>
-
-<!-- Témoignages -->
-<?php if (!empty($testimonials)): ?>
-<section class="py-12 bg-gray-100 dark:bg-gray-800">
-    <div class="container mx-auto px-4">
-        <h2 class="text-3xl font-bold mb-8 dark:text-white flex items-center">
-            <i class="fas fa-quote-left text-blue-600 dark:text-blue-500 mr-3"></i> Ils nous ont fait confiance
-        </h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <?php foreach ($testimonials as $index => $testimonial): ?>
-                <div class="bg-white rounded-lg shadow-md p-6 testimonial-card animate-fadeInUp delay-<?php echo ($index + 1) * 100; ?> dark:bg-gray-800">
-                    <div class="flex items-center mb-4">
-                        <div class="text-yellow-400 text-lg">
-                            <?php for ($i = 1; $i <= 5; $i++): ?>
-                                <?php if ($i <= $testimonial['rating']): ?>
-                                    <i class="fas fa-star"></i>
-                                <?php else: ?>
-                                    <i class="far fa-star"></i>
-                                <?php endif; ?>
-                            <?php endfor; ?>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4 dark:text-gray-300"><?php echo htmlspecialchars($testimonial['comment_text']); ?></p>
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <div class="font-bold dark:text-white"><?php echo htmlspecialchars($testimonial['username']); ?></div>
-                            <div class="text-sm text-gray-500 dark:text-gray-400">À propos de "<?php echo htmlspecialchars($testimonial['book_title']); ?>"</div>
-                        </div>
-                        <a href="book.php?id=<?php echo $testimonial['book_id']; ?>" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-                            Voir le livre <i class="fas fa-external-link-alt ml-1 text-xs"></i>
-                        </a>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
-        
-        <div class="mt-8 text-center">
-            <a href="testimonials.php" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold btn transition-colors">
-                <i class="fas fa-comments mr-2"></i> Voir tous les témoignages
-            </a>
-        </div>
-    </div>
-</section>
-<?php endif; ?>
-
-<!-- Inscription -->
-<?php if (!isset($_SESSION['user_id'])): ?>
-<section class="py-12 bg-blue-800 text-white dark:bg-blue-900">
-    <div class="container mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold mb-4">Rejoignez notre communauté</h2>
-        <p class="text-xl mb-8 max-w-3xl mx-auto">Créez votre compte gratuitement pour accéder à tous nos livres, prendre des notes et partager vos impressions avec les autres lecteurs.</p>
-        <a href="register.php" class="inline-block bg-white hover:bg-gray-100 text-blue-800 px-8 py-4 rounded-lg font-bold text-lg btn transition-colors dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-blue-400">
-            <i class="fas fa-user-plus mr-2"></i> S'inscrire maintenant
-        </a>
-    </div>
-</section>
-<?php endif; ?>
+    </section>
+    <?php endif; ?>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Animation des éléments au scroll
-    const animateElements = () => {
-        const elements = document.querySelectorAll('.animate-fadeInUp');
-        elements.forEach(el => {
-            const rect = el.getBoundingClientRect();
-            const windowHeight = window.innerHeight;
-            
-            if (rect.top <= windowHeight * 0.85 && !el.classList.contains('animated')) {
-                el.style.opacity = '1';
-                el.classList.add('animated');
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target); // Ne pas re-animer
             }
         });
+    }, observerOptions);
+
+    // Observer tous les éléments avec animation
+    document.querySelectorAll('.slide-up-enter').forEach(element => {
+        observer.observe(element);
+    });
+
+    // Animation des compteurs (stats) avec vraies données
+    const animateCounters = () => {
+        const counters = document.querySelectorAll('[data-target]');
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-target'));
+            let current = 0;
+            const increment = target / 50;
+            
+            const updateCounter = () => {
+                if (current < target) {
+                    current += increment;
+                    if (target > 1000) {
+                        counter.textContent = Math.floor(current).toLocaleString() + '+';
+                    } else {
+                        counter.textContent = Math.floor(current) + '+';
+                    }
+                    setTimeout(updateCounter, 30);
+                } else {
+                    if (target > 1000) {
+                        counter.textContent = target.toLocaleString() + '+';
+                    } else {
+                        counter.textContent = target + '+';
+                    }
+                }
+            };
+            
+            updateCounter();
+        });
     };
-    
-    // Initialiser les animations
-    animateElements();
-    
-    // Animer au scroll
-    window.addEventListener('scroll', animateElements);
+
+    // Démarrer l'animation des compteurs après un délai
+    setTimeout(animateCounters, 1000);
 });
 </script>
 

@@ -5,7 +5,7 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 // Vérification admin désactivée temporairement pour débogage
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: ../login.php?message=unauthorized");
     exit();
 }

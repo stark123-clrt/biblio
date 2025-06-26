@@ -4,11 +4,11 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Vérification admin désactivée temporairement pour débogage
-// if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-//     header("Location: ../login.php?message=unauthorized");
-//     exit();
-// }
+
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header("Location: ../login.php?message=unauthorized");
+    exit();
+}
 
 require_once "../config/database.php";
 

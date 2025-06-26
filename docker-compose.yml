@@ -25,6 +25,7 @@ services:
       MYSQL_PASSWORD: userpassword
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./mydb.sql:/docker-entrypoint-initdb.d/mydb.sql
     networks:
       - mynetwork
 
@@ -35,7 +36,7 @@ services:
     ports:
       - "8083:80"  # Accéder à PHPMyAdmin via le port 8083
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: mysql-db
       PMA_PORT: 3306
     networks:
       - mynetwork

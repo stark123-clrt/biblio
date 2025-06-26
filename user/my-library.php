@@ -38,15 +38,30 @@ $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->execute();
 $library_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Récupérer les statistiques de lecture
-$stmt = $conn->prepare("SELECT COUNT(DISTINCT book_id) as total_books,
-                        SUM(CASE WHEN action = 'started' THEN 1 ELSE 0 END) as started_books,
-                        SUM(CASE WHEN action = 'finished' THEN 1 ELSE 0 END) as finished_books
-                        FROM reading_history
-                        WHERE user_id = :user_id");
+// Calculer les statistiques correctement à partir des livres de la bibliothèque
+$total_books = count($library_books);
+$started_books = 0;
+$finished_books = 0;
+
+foreach ($library_books as $book) {
+    if ($book['last_page_read'] > 1) {
+        $started_books++;
+        
+        // Vérifier si le livre est terminé
+        if (isset($book['pages_count']) && $book['pages_count'] > 0) {
+            $progress = ($book['last_page_read'] / $book['pages_count']) * 100;
+            if ($progress >= 99.5) {
+                $finished_books++;
+            }
+        }
+    }
+}
+
+// Récupérer le nombre de notes
+$stmt = $conn->prepare("SELECT COUNT(*) FROM notes WHERE user_id = :user_id");
 $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
 $stmt->execute();
-$reading_stats = $stmt->fetch(PDO::FETCH_ASSOC);
+$notes_count = $stmt->fetchColumn();
 
 // Récupérer l'activité récente
 $stmt = $conn->prepare("SELECT rh.*, b.title as book_title
@@ -62,239 +77,319 @@ $recent_activity = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $page_title = "Ma Bibliothèque";
 include "../includes/header.php";
 ?>
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800 dark:text-white">Ma Espace de livre</h1>
-    
-    <!-- Statistiques et profil -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
-        <div class="md:flex">
-            <div class="md:w-1/4 mb-4 md:mb-0">
-                <div class="text-center">
-                    <?php if (!empty($user['profile_picture'])): ?>
-                        <img src="<?php echo $user['profile_picture']; ?>" alt="Photo de profil" class="w-32 h-32 rounded-full mx-auto object-cover border-2 border-blue-100 dark:border-blue-900">
-                    <?php else: ?>
-                        <div class="w-32 h-32 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mx-auto">
-                            <span class="text-4xl text-blue-800 dark:text-blue-300"><?php echo strtoupper(substr($user['username'], 0, 1)); ?></span>
+
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
+    <div class="container mx-auto px-4 py-8">
+        <!-- En-tête avec titre moderne -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+                Mon Espace Lecture
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300 font-light">
+                Découvrez votre univers littéraire personnel
+            </p>
+        </div>
+        
+        <!-- Profil et statistiques avec design moderne -->
+        <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/20 p-8 mb-12">
+            <div class="flex flex-col lg:flex-row items-center lg:items-start space-y-8 lg:space-y-0 lg:space-x-12">
+                <!-- Profil utilisateur -->
+                <div class="flex-shrink-0 text-center">
+                    <div class="relative inline-block">
+                        <?php if (!empty($user['profile_picture'])): ?>
+                            <img src="<?php echo $user['profile_picture']; ?>" alt="Photo de profil" 
+                                 class="w-32 h-32 rounded-full object-cover border-4 border-gradient-to-r from-blue-500 to-purple-500 shadow-2xl">
+                        <?php else: ?>
+                            <div class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-2xl">
+                                <span class="text-4xl font-bold text-white"><?php echo strtoupper(substr($user['username'], 0, 1)); ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <div class="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-white dark:border-gray-800 shadow-lg"></div>
+                    </div>
+                    <h2 class="mt-4 text-2xl font-bold text-gray-800 dark:text-white"><?php echo htmlspecialchars($user['username']); ?></h2>
+                    <p class="text-gray-600 dark:text-gray-400">Lecteur passionné</p>
+                </div>
+                
+                <!-- Statistiques avec cartes modernes -->
+                <div class="flex-1 w-full">
+                    <h3 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Vos Statistiques</h3>
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Total des livres -->
+                        <div class="group">
+                            <div class="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="p-3 bg-white/20 rounded-xl">
+                                        <i class="fas fa-book text-2xl"></i>
+                                    </div>
+                                    <div class="text-3xl font-bold"><?php echo $total_books; ?></div>
+                                </div>
+                                <div class="text-blue-100 text-sm font-medium">Livres dans ma bibliothèque</div>
+                            </div>
                         </div>
-                    <?php endif; ?>
-                    <div class="mt-2 font-bold text-gray-800 dark:text-white"><?php echo htmlspecialchars($user['username']); ?></div>
+                        
+                        <!-- Livres commencés -->
+                        <div class="group">
+                            <div class="bg-gradient-to-br from-green-500 to-green-600 p-6 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="p-3 bg-white/20 rounded-xl">
+                                        <i class="fas fa-play text-2xl"></i>
+                                    </div>
+                                    <div class="text-3xl font-bold"><?php echo $started_books; ?></div>
+                                </div>
+                                <div class="text-green-100 text-sm font-medium">Livres commencés</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Livres terminés -->
+                        <div class="group">
+                            <div class="bg-gradient-to-br from-purple-500 to-purple-600 p-6 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="p-3 bg-white/20 rounded-xl">
+                                        <i class="fas fa-check-circle text-2xl"></i>
+                                    </div>
+                                    <div class="text-3xl font-bold"><?php echo $finished_books; ?></div>
+                                </div>
+                                <div class="text-purple-100 text-sm font-medium">Livres terminés</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notes prises -->
+                        <div class="group">
+                            <div class="bg-gradient-to-br from-yellow-500 to-orange-500 p-6 rounded-2xl text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="p-3 bg-white/20 rounded-xl">
+                                        <i class="fas fa-sticky-note text-2xl"></i>
+                                    </div>
+                                    <div class="text-3xl font-bold"><?php echo $notes_count; ?></div>
+                                </div>
+                                <div class="text-yellow-100 text-sm font-medium">Notes prises</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filtres et recherche avec design moderne et responsive -->
+        <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-6 mb-8">
+            <!-- Filtres avec design moderne -->
+            <div class="flex flex-col space-y-4 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Filtrer vos livres</h3>
+                <div class="flex flex-wrap gap-3">
+                    <button class="filter-btn px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active" data-filter="all">
+                        <i class="fas fa-th-large mr-2"></i>Tous
+                    </button>
+                    <button class="filter-btn px-6 py-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-600" data-filter="reading">
+                        <i class="fas fa-book-reader mr-2"></i>En cours
+                    </button>
+                    <button class="filter-btn px-6 py-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-600" data-filter="favorites">
+                        <i class="fas fa-heart mr-2"></i>Favoris
+                    </button>
+                    <button class="filter-btn px-6 py-3 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 border border-gray-200 dark:border-gray-600" data-filter="not-started">
+                        <i class="fas fa-hourglass-start mr-2"></i>Non commencés
+                    </button>
                 </div>
             </div>
             
-            <div class="md:w-3/4 md:pl-6">
-                <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Statistiques de lecture</h2>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded text-center">
-                        <div class="text-3xl font-bold text-blue-800 dark:text-blue-300"><?php echo count($library_books); ?></div>
-                        <div class="text-gray-600 dark:text-gray-300">Livres dans ma bibliothèque</div>
-                    </div>
-                    <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded text-center">
-                        <div class="text-3xl font-bold text-green-800 dark:text-green-300"><?php echo $reading_stats['started_books']; ?></div>
-                        <div class="text-gray-600 dark:text-gray-300">Livres commencés</div>
-                    </div>
-                    <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded text-center">
-                        <?php
-                            // Compter les livres terminés directement ici
-                            $completed_books = 0;
-                            foreach ($library_books as $book) {
-                                if (isset($book['pages_count']) && $book['pages_count'] > 0) {
-                                    $progress = ($book['last_page_read'] / $book['pages_count']) * 100;
-                                    if ($progress >= 99.5) {
-                                        $completed_books++;
-                                    }
-                                }
-                            }
-                        ?>
-                        <div class="text-3xl font-bold text-purple-800 dark:text-purple-300"><?php echo $completed_books; ?></div>
-                        <div class="text-gray-600 dark:text-gray-300">Livres terminés</div>
-                    </div>
-                    <div class="bg-yellow-50 dark:bg-yellow-900/30 p-4 rounded text-center">
-                        <div class="text-3xl font-bold text-yellow-800 dark:text-yellow-300">
-                            <?php
-                                $notes_count = 0;
-                                $stmt = $conn->prepare("SELECT COUNT(*) FROM notes WHERE user_id = :user_id");
-                                $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-                                $stmt->execute();
-                                $notes_count = $stmt->fetchColumn();
-                                echo $notes_count;
-                            ?>
-                        </div>
-                        <div class="text-gray-600 dark:text-gray-300">Notes prises</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Filtres et recherche -->
-    <div class="flex flex-wrap justify-between items-center mb-6">
-        <div class="w-full md:w-auto mb-4 md:mb-0">
-            <div class="flex space-x-2">
-                <button class="filter-btn px-4 py-2 bg-blue-600 text-white rounded-lg active" data-filter="all">
-                    Tous
-                </button>
-                <button class="filter-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg" data-filter="reading">
-                    En cours
-                </button>
-                <button class="filter-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg" data-filter="favorites">
-                    Favoris
-                </button>
-                <button class="filter-btn px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg" data-filter="not-started">
-                    Non commencés
-                </button>
-            </div>
-        </div>
-        <div class="w-full md:w-auto">
+            <!-- Barre de recherche moderne -->
             <div class="relative">
-                <input type="text" id="searchLibrary" placeholder="Rechercher dans ma bibliothèque..." 
-                       class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
-                <button class="absolute right-2 top-2 text-gray-500 dark:text-gray-400">
-                    <i class="fas fa-search"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Liste des livres -->
-    <div id="libraryBooks" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <?php if (!empty($library_books)): ?>
-            <?php foreach ($library_books as $book): ?>
-                <?php
-                    // Déterminer le statut du livre
-                    $book_status = '';
-                    if ($book['last_page_read'] > 1) {
-                        $book_status = 'reading';
-                    } else {
-                        $book_status = 'not-started';
-                    }
-                    if ($book['is_favorite']) {
-                        $book_status .= ' favorites';
-                    }
-                ?>
-    <div class="library-book bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform hover:scale-105 <?php echo $book_status; ?>" data-title="<?php echo htmlspecialchars(strtolower($book['title'])); ?>">
-    <div class="relative">
-        <?php if (!empty($book['cover_image'])): ?>
-            <img src="../<?php echo $book['cover_image']; ?>" alt="<?php echo htmlspecialchars($book['title']); ?>" class="w-full h-48 object-cover">
-        <?php else: ?>
-            <div class="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                <i class="fas fa-book text-4xl text-gray-400 dark:text-gray-500"></i>
-            </div>
-        <?php endif; ?>
-        
-        <!-- Badge de progression -->
-        <?php 
-            $progress = 0;
-            $isCompleted = false;
-            if (isset($book['pages_count']) && $book['pages_count'] > 0) {
-                $progress = min(100, ($book['last_page_read'] / $book['pages_count']) * 100);
-                $isCompleted = ($progress >= 99.5); // Considérer comme terminé si ≥ 99.5%
-            }
-            
-            if ($book['last_page_read'] > 1 && !$isCompleted): 
-        ?>
-            <div class="absolute top-2 left-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-                En cours
-            </div>
-        <?php elseif ($isCompleted): ?>
-            <div class="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded-full">
-                Terminé
-            </div>
-        <?php endif; ?>
-        
-        <!-- Bouton favori -->
-        <button class="favorite-btn absolute top-2 right-2 text-xl text-yellow-500 bg-white dark:bg-gray-800 bg-opacity-80 dark:bg-opacity-80 w-8 h-8 rounded-full flex items-center justify-center" data-id="<?php echo $book['id']; ?>" data-favorite="<?php echo $book['is_favorite'] ? '1' : '0'; ?>">
-            <i class="<?php echo $book['is_favorite'] ? 'fas' : 'far'; ?> fa-star"></i>
-        </button>
-    </div>
-    
-    <div class="p-4">
-        <div class="flex justify-between items-start mb-2">
-            <div>
-                <h3 class="font-bold line-clamp-2 text-gray-800 dark:text-white"><?php echo htmlspecialchars($book['title']); ?></h3>
-                <div class="text-xs text-gray-600 dark:text-gray-400 mb-1"><?php echo htmlspecialchars($book['category_name'] ?? 'Non catégorisé'); ?></div>
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <i class="fas fa-search text-gray-400"></i>
+                </div>
+                <input type="text" id="searchLibrary" placeholder="Rechercher dans votre bibliothèque..." 
+                       class="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400">
             </div>
         </div>
         
-        <?php if ($book['last_page_read'] > 1): ?>
-            <!-- Barre de progression -->
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-2">
-                <div class="<?php echo $isCompleted ? 'bg-green-600' : 'bg-blue-600'; ?> h-2.5 rounded-full" style="width: <?php echo $progress; ?>%"></div>
-            </div>
-            <div class="text-xs text-gray-600 dark:text-gray-400 mb-3">
-                Page <?php echo $book['last_page_read']; ?> 
-                <?php if (isset($book['pages_count']) && $book['pages_count'] > 0): ?>
-                    sur <?php echo $book['pages_count']; ?> (<?php echo round($progress); ?>%)
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-        
-        <div class="mt-2 flex flex-wrap justify-between items-center">
-            <a href="../book.php?id=<?php echo $book['id']; ?>" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">
-                Détails
-            </a>
-            
-            <?php if (!$isCompleted): ?>
-                <a href="../read.php?id=<?php echo $book['id']; ?>" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded">
-                    <?php echo $book['last_page_read'] > 1 ? 'Continuer' : 'Commencer'; ?>
-                </a>
+        <!-- Grille des livres avec design moderne -->
+        <div id="libraryBooks" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <?php if (!empty($library_books)): ?>
+                <?php foreach ($library_books as $book): ?>
+                    <?php
+                        // Déterminer le statut du livre
+                        $book_status = '';
+                        $progress = 0;
+                        $isCompleted = false;
+                        
+                        if (isset($book['pages_count']) && $book['pages_count'] > 0) {
+                            $progress = min(100, ($book['last_page_read'] / $book['pages_count']) * 100);
+                            $isCompleted = ($progress >= 99.5);
+                        }
+                        
+                        if ($book['last_page_read'] > 1 && !$isCompleted) {
+                            $book_status = 'reading';
+                        } elseif ($book['last_page_read'] <= 1) {
+                            $book_status = 'not-started';
+                        }
+                        
+                        if ($book['is_favorite']) {
+                            $book_status .= ' favorites';
+                        }
+                    ?>
+
+                    <div class="library-book group bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/20 overflow-hidden transition-all duration-500 hover:scale-105 hover:shadow-2xl <?php echo $book_status; ?>" data-title="<?php echo htmlspecialchars(strtolower($book['title'])); ?>">
+                        <!-- Image avec overlay moderne -->
+                        <div class="relative overflow-hidden">
+                            <?php if (!empty($book['cover_image'])): ?>
+                                <?php
+                                $image_path = $book['cover_image'];
+                                if (strpos($image_path, '../') === 0) {
+                                    $image_path = substr($image_path, 3);
+                                }
+                                $image_path = '../' . $image_path;
+                                ?>
+                                <img src="<?php echo htmlspecialchars($image_path); ?>" 
+                                     alt="<?php echo htmlspecialchars($book['title']); ?>" 
+                                     class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="w-full h-64 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center" style="display:none;">
+                                    <i class="fas fa-book text-6xl text-gray-400 dark:text-gray-500"></i>
+                                </div>
+                            <?php else: ?>
+                                <div class="w-full h-64 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+                                    <i class="fas fa-book text-6xl text-gray-400 dark:text-gray-500"></i>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- Overlay gradient -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            
+                            <!-- Badges avec design moderne -->
+                            <div class="absolute top-4 left-4 right-4 flex justify-between items-start">
+                                <!-- Badge de statut -->
+                                <?php if ($book['last_page_read'] > 1 && !$isCompleted): ?>
+                                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-3 py-2 rounded-full shadow-lg backdrop-blur-sm">
+                                        <i class="fas fa-play mr-1"></i>En cours
+                                    </div>
+                                <?php elseif ($isCompleted): ?>
+                                    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-bold px-3 py-2 rounded-full shadow-lg backdrop-blur-sm">
+                                        <i class="fas fa-check mr-1"></i>Terminé
+                                    </div>
+                                <?php else: ?>
+                                    <div></div>
+                                <?php endif; ?>
+                                
+                                <!-- Bouton favori moderne -->
+                                <button class="favorite-btn w-10 h-10 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-yellow-400 hover:bg-white/30 transition-all duration-300 shadow-lg" data-id="<?php echo $book['id']; ?>" data-favorite="<?php echo $book['is_favorite'] ? '1' : '0'; ?>">
+                                    <i class="<?php echo $book['is_favorite'] ? 'fas' : 'far'; ?> fa-heart text-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Contenu de la carte -->
+                        <div class="p-6">
+                            <!-- Titre et catégorie -->
+                            <div class="mb-4">
+                                <h3 class="font-bold text-lg line-clamp-2 text-gray-800 dark:text-white mb-1">
+                                    <?php echo htmlspecialchars($book['title']); ?>
+                                </h3>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
+                                    <?php echo htmlspecialchars($book['category_name'] ?? 'Non catégorisé'); ?>
+                                </div>
+                            </div>
+                            
+                            <!-- Barre de progression moderne -->
+                            <?php if ($book['last_page_read'] > 1): ?>
+                                <div class="mb-4">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Progression</span>
+                                        <span class="text-sm font-bold text-gray-900 dark:text-white"><?php echo round($progress); ?>%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                                        <div class="<?php echo $isCompleted ? 'bg-gradient-to-r from-green-500 to-green-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'; ?> h-3 rounded-full transition-all duration-500 ease-out" style="width: <?php echo $progress; ?>%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                        Page <?php echo $book['last_page_read']; ?> 
+                                        <?php if (isset($book['pages_count']) && $book['pages_count'] > 0): ?>
+                                            sur <?php echo $book['pages_count']; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- Actions avec boutons modernes -->
+                            <div class="flex flex-col space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <a href="../book.php?id=<?php echo $book['id']; ?>" 
+                                       class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-300">
+                                        <i class="fas fa-info-circle mr-1"></i>Détails
+                                    </a>
+                                    
+                                    <?php if (!$isCompleted): ?>
+                                        <a href="../read.php?id=<?php echo $book['id']; ?>" 
+                                           class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 hover:scale-105 shadow-lg">
+                                            <i class="fas fa-<?php echo $book['last_page_read'] > 1 ? 'play' : 'book-open'; ?> mr-1"></i>
+                                            <?php echo $book['last_page_read'] > 1 ? 'Continuer' : 'Commencer'; ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <?php
+                                        $file_path = $book['file_path'];
+                                        if (strpos($file_path, '../') === 0) {
+                                            $file_path = substr($file_path, 3);
+                                        }
+                                        $file_path = '../' . $file_path;
+                                        ?>
+                                        <a href="<?php echo htmlspecialchars($file_path); ?>" download 
+                                           class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 hover:scale-105 shadow-lg">
+                                            <i class="fas fa-download mr-1"></i>Télécharger
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <!-- Bouton de suppression discret -->
+                                <button class="remove-book-btn text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition-colors duration-300 text-center py-2" 
+                                        data-id="<?php echo $book['id']; ?>" data-title="<?php echo htmlspecialchars($book['title']); ?>">
+                                    <i class="fas fa-trash-alt mr-1"></i>Retirer de ma bibliothèque
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             <?php else: ?>
-                <!-- Bouton de téléchargement pour les livres terminés -->
-                <a href="../<?php echo $book['file_path']; ?>" download class="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded flex items-center">
-                    <i class="fas fa-download mr-1"></i> Télécharger
-                </a>
+                <div class="col-span-full text-center py-20">
+                    <div class="text-gray-400 dark:text-gray-500 text-8xl mb-6">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold text-gray-700 dark:text-gray-300 mb-4">Votre bibliothèque est vide</h2>
+                    <p class="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+                        Découvrez des livres passionnants et commencez votre aventure littéraire.
+                    </p>
+                    <a href="../library.php" 
+                       class="inline-block bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 shadow-lg">
+                        <i class="fas fa-search mr-2"></i>Parcourir la bibliothèque
+                    </a>
+                </div>
             <?php endif; ?>
         </div>
         
-        <!-- Bouton de suppression -->
-        <div class="mt-2 text-center">
-            <button class="remove-book-btn text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm" data-id="<?php echo $book['id']; ?>" data-title="<?php echo htmlspecialchars($book['title']); ?>">
-                <i class="fas fa-trash-alt mr-1"></i> Retirer de ma bibliothèque
-            </button>
-        </div>
-    </div>
-</div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <div class="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow">
-                <div class="text-gray-400 dark:text-gray-500 text-6xl mb-4">
-                    <i class="fas fa-book-open"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-700 dark:text-gray-300 mb-2">Votre bibliothèque est vide</h2>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">
-                    Vous n'avez pas encore ajouté de livres à votre bibliothèque personnelle.
-                </p>
-                <a href="../library.php" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                    Parcourir la bibliothèque
-                </a>
-            </div>
-        <?php endif; ?>
-    </div>
-    <!-- Activité récente -->
-    <div class="mt-10">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Activité récente</h2>
-        
+        <!-- Activité récente avec design moderne -->
         <?php if (!empty($recent_activity)): ?>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+        <div class="mt-16">
+            <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white text-center">Activité Récente</h2>
+            
+            <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 dark:border-gray-700/20 overflow-hidden">
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
                     <?php foreach ($recent_activity as $activity): ?>
-                        <li class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <div class="flex items-start">
-                                <div class="flex-shrink-0 mr-3">
+                        <div class="p-6 hover:bg-gray-50/50 dark:hover:bg-gray-700/50 transition-colors duration-300">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
                                     <?php if ($activity['action'] == 'started'): ?>
-                                        <span class="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 p-2 rounded-full">
-                                            <i class="fas fa-play"></i>
-                                        </span>
+                                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center shadow-lg">
+                                            <i class="fas fa-play text-white"></i>
+                                        </div>
                                     <?php elseif ($activity['action'] == 'continued'): ?>
-                                        <span class="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 p-2 rounded-full">
-                                            <i class="fas fa-book-reader"></i>
-                                        </span>
+                                        <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                                            <i class="fas fa-book-reader text-white"></i>
+                                        </div>
                                     <?php elseif ($activity['action'] == 'finished'): ?>
-                                        <span class="bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300 p-2 rounded-full">
-                                            <i class="fas fa-check"></i>
-                                        </span>
+                                        <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+                                            <i class="fas fa-check text-white"></i>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
-                                <div>
-                                    <div class="font-semibold text-gray-800 dark:text-white">
+                                
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-semibold text-gray-800 dark:text-white mb-1">
                                         <?php if ($activity['action'] == 'started'): ?>
                                             Vous avez commencé à lire
                                         <?php elseif ($activity['action'] == 'continued'): ?>
@@ -302,29 +397,31 @@ include "../includes/header.php";
                                         <?php elseif ($activity['action'] == 'finished'): ?>
                                             Vous avez terminé
                                         <?php endif; ?>
-                                        <a href="../book.php?id=<?php echo $activity['book_id']; ?>" class="text-blue-600 dark:text-blue-400 hover:underline">
+                                        <a href="../read.php?id=<?php echo $activity['book_id']; ?>" 
+                                           class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-300">
                                             <?php echo htmlspecialchars($activity['book_title']); ?>
                                         </a>
                                     </div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">
                                         <?php if ($activity['action'] == 'continued'): ?>
-                                            Page <?php echo $activity['page_number']; ?>
+                                            <span class="inline-flex items-center bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-medium mr-2">
+                                                Page <?php echo $activity['page_number']; ?>
+                                            </span>
                                         <?php endif; ?>
-                                        <span class="ml-2"><?php echo date('d/m/Y à H:i', strtotime($activity['timestamp'])); ?></span>
+                                        <i class="fas fa-clock mr-1"></i>
+                                        <?php echo date('d/m/Y à H:i', strtotime($activity['timestamp'])); ?>
                                     </div>
                                 </div>
                             </div>
-                        </li>
+                        </div>
                     <?php endforeach; ?>
-                </ul>
+                </div>
             </div>
-        <?php else: ?>
-            <div class="text-center py-8 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                <p class="text-gray-600 dark:text-gray-400">Aucune activité récente à afficher.</p>
-            </div>
+        </div>
         <?php endif; ?>
     </div>
 </div>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
