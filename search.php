@@ -439,13 +439,24 @@ body, .bg-white, .bg-gray-50, .bg-gray-100, .bg-blue-50, input, select, textarea
                         <a href="book.php?id=<?php echo $book['id']; ?>" class="block h-full">
                             <div class="relative overflow-hidden">
                                 <?php if (!empty($book['cover_image'])): ?>
-                                    <img src="<?php echo $book['cover_image']; ?>" alt="<?php echo htmlspecialchars($book['title']); ?>" 
-                                         class="w-full h-64 object-cover transform transition-transform hover:scale-110">
-                                <?php else: ?>
-                                    <div class="w-full h-64 bg-gray-200 flex items-center justify-center transform transition-transform hover:scale-110 dark:bg-gray-700">
-                                        <i class="fas fa-book text-5xl text-gray-400 dark:text-gray-500"></i>
-                                    </div>
-                                <?php endif; ?>
+    <?php
+    $image_path = $book['cover_image'];
+    if (strpos($image_path, '../') === 0) {
+        $image_path = substr($image_path, 3);
+    }
+    ?>
+    <img src="<?php echo htmlspecialchars($image_path); ?>" 
+         alt="<?php echo htmlspecialchars($book['title']); ?>" 
+         class="w-full h-64 object-cover transform transition-transform hover:scale-110"
+         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+    <div class="w-full h-64 bg-gray-200 flex items-center justify-center transform transition-transform hover:scale-110 dark:bg-gray-700" style="display:none;">
+        <i class="fas fa-book text-5xl text-gray-400 dark:text-gray-500"></i>
+    </div>
+<?php else: ?>
+    <div class="w-full h-64 bg-gray-200 flex items-center justify-center transform transition-transform hover:scale-110 dark:bg-gray-700">
+        <i class="fas fa-book text-5xl text-gray-400 dark:text-gray-500"></i>
+    </div>
+<?php endif; ?>
                                 <?php if ($sort_by == 'popularity' || $book['views_count'] > 50): ?>
                                     <div class="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
                                         <i class="fas fa-eye mr-1"></i> <?php echo $book['views_count']; ?>

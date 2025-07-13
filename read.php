@@ -621,6 +621,14 @@ if (strpos($cover_image, '../') === 0) {
                 <button id="bookmarkBtn" class="btn btn-primary">
                     <i class="fas fa-bookmark"></i>
                 </button>
+
+                <button id="audioToggleBtn" class="btn btn-primary" title="Lecture audio">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+
+                <div id="audioStatus" style="display: none; font-size: 8px; color: #666; margin-left: 2px;">
+                   <span id="audioProgress"></span>
+                </div>
             </div>
         </div>
         
@@ -756,632 +764,1491 @@ if (strpos($cover_image, '../') === 0) {
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // Configuration PDF.js
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+<script>
+
+
+
+
+
+// 🚀 CODE JAVASCRIPT COMPLET - read.php avec extraction ultra-simple
+
+// Configuration PDF.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// Variables globales
+let pdfDoc = null;
+let pageNum = <?php echo $last_page; ?>;
+let pageRendering = false;
+let pageNumPending = null;
+let scale = 1.0;
+let selectedRating = 0;
+let currentNote = null;
+
+const canvas = document.getElementById('pdfCanvas');
+const ctx = canvas.getContext('2d');
+const bookId = <?php echo $book_id; ?>;
+const userId = <?php echo $user_id; ?>;
+
+let lastKnownPage = pageNum;
+
+// Détection mobile
+function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+// 🎵 AUDIOREADЕР AVEC EXTRACTION ULTRA-SIMPLE
+class AudioReader {
+    constructor() {
+        this.isReading = false;
+        this.isPaused = false;
+        this.currentAudio = null;
+        this.textChunks = [];
+        this.currentChunkIndex = 0;
+        this.preloadedAudios = new Map();
+        this.readingSpeed = 1.0;
         
-        // Variables globales
-        let pdfDoc = null;
-        let pageNum = <?php echo $last_page; ?>;
-        let pageRendering = false;
-        let pageNumPending = null;
-        let scale = 1.0; // 300% par défaut sur mobile
-        let selectedRating = 0;
-        let currentNote = null;
+        this.chunkSize = 1000;
+        this.maxWordsPerChunk = 500; 
+        this.minChunkLength = 50; 
+        this.preloadCount = 5;
         
-        const canvas = document.getElementById('pdfCanvas');
-        const ctx = canvas.getContext('2d');
-        const bookId = <?php echo $book_id; ?>;
-        const userId = <?php echo $user_id; ?>;
+        this.currentPageNumber = null;
+        this.audioCache = new Map();
+        this.isProcessing = false;
+        this.pageWatcher = null;
         
-        // Détection mobile
-        function isMobile() {
-            return window.innerWidth <= 768;
+        // Système de continuité
+        this.nextPageChunks = [];
+        this.nextPagePreloaded = new Map();
+        this.continuousMode = true;
+        this.anticipationThreshold = 2; // 🔥 PLUS TÔT
+        this.nextPageText = '';
+        this.isPreloadingNextPage = false;
+        
+        console.log('🎵 AudioReader ULTRA-SIMPLE initialisé');
+    }
+
+    setupPageChangeDetection() {
+        this.currentPageNumber = pageNum;
+        
+        this.pageWatcher = setInterval(() => {
+            if (typeof pageNum !== 'undefined' && 
+                pageNum !== this.currentPageNumber && 
+                !this.isProcessing && 
+                !this.continuousMode) {
+                
+                console.log('📄 Changement de page manuel détecté:', this.currentPageNumber, '->', pageNum);
+                this.handlePageChange();
+                this.currentPageNumber = pageNum;
+            }
+        }, 300);
+    }
+    
+    handlePageChange() {
+        if (this.isReading && !this.isProcessing && !this.continuousMode) {
+            console.log('🛑 Arrêt lecture - changement de page manuel');
+            this.stopReading(false);
         }
+    }
 
-        // Chargement du PDF
-        function loadPDF() {
-            document.getElementById('loadingSpinner').style.display = 'block';
+    // 🔥 EXTRACTION ULTRA-SIMPLE - TOUT LE TEXTE BRUT
+    async extractTextFromPage(pageNumber) {
+        try {
+            if (!pdfDoc) {
+                throw new Error('PDF non chargé');
+            }
+
+            console.log('📄 Extraction BRUTE page', pageNumber);
+            const page = await pdfDoc.getPage(pageNumber);
+            const textContent = await page.getTextContent();
             
-            pdfjsLib.getDocument('<?php echo addslashes($book_path); ?>').promise.then(function(pdf) {
-                pdfDoc = pdf;
-                document.getElementById('totalPages').textContent = pdf.numPages;
-                
-                // Ajuster le zoom selon l'écran
-            if (!isMobile()) {
-                 scale = 1.5; // 150% sur desktop
-                 document.getElementById('zoomLevel').textContent = '150%';
-              }
-
-                document.getElementById('pageInput').max = pdf.numPages;
-                
-                renderPage(pageNum);
-            }).catch(function(error) {
-                console.error('Erreur lors du chargement du PDF:', error);
-                alert('Erreur lors du chargement du livre.');
+            // 🔥 ULTRA-SIMPLE : Tout récupérer, point final
+            let allText = '';
+            textContent.items.forEach(item => {
+                if (item.str) {  // Si y'a du texte, on prend
+                    allText += item.str + ' ';  // Juste ajouter avec espace
+                }
             });
+
+            console.log(`✅ Page ${pageNumber} - BRUT: ${allText.length} caractères`);
+            
+            return allText.trim();  // Juste enlever espaces début/fin
+            
+        } catch (error) {
+            console.error('❌ Erreur extraction page', pageNumber, ':', error);
+            return '';
+        }
+    }
+
+    // 🔥 EXTRACTION ANTICIPÉE BRUTALE
+    async extractTextFromNextPage(currentPage) {
+        if (currentPage >= pdfDoc.numPages) {
+            return '';
         }
         
-        // Rendu optimisé d'une page
-        function renderPage(num) {
-            pageRendering = true;
-            document.getElementById('loadingSpinner').style.display = 'block';
+        const nextPage = currentPage + 1;
+        console.log(`📄 Extraction BRUTE anticipée page ${nextPage}`);
+        
+        try {
+            return await this.extractTextFromPage(nextPage);
+        } catch (error) {
+            console.error(`❌ Erreur extraction anticipée page ${nextPage}:`, error);
+            return '';
+        }
+    }
+
+    async extractTextFromCurrentPage() {
+        this.currentPageNumber = pageNum;
+        await this.waitForPageRender(pageNum);
+        return this.extractTextFromPage(pageNum);
+    }
+
+    // 🔥 NETTOYAGE MINIMAL
+    cleanText(text) {
+        // JUSTE le minimum : enlever espaces multiples
+        return text.replace(/\s+/g, ' ').trim();
+    }
+
+    // 🔥 GROS CHUNKS BRUTS
+    splitTextIntoChunks(text, maxLength = null) {
+        if (!text || text.trim().length === 0) return [''];
+        
+        // CHUNKS ÉNORMES - Laisser l'API TTS gérer
+        const chunkSize = 1000;  // 1000 caractères au lieu de 200
+        text = text.trim();
+        
+        if (text.length <= chunkSize) {
+            return [text];  // Une page = un chunk si possible
+        }
+        
+        // Si trop gros, découper brutalement
+        const chunks = [];
+        for (let i = 0; i < text.length; i += chunkSize) {
+            chunks.push(text.substring(i, i + chunkSize));
+        }
+        
+        console.log(`✂️ Découpage BRUT: ${chunks.length} chunks de ~${chunkSize} chars`);
+        
+        return chunks;
+    }
+    
+    // 🔥 SUPPRESSION DE splitByWords ET countWords - PLUS BESOIN
+    
+    async waitForPageRender(targetPage, maxWait = 2000) {
+        console.log('⏳ Attente page', targetPage);
+        
+        const startTime = Date.now();
+        
+        return new Promise((resolve) => {
+            const checkPageReady = () => {
+                const pageInput = document.getElementById('pageInput');
+                
+                const isPageReady = (
+                    typeof pageNum !== 'undefined' && 
+                    pageNum === targetPage && 
+                    !pageRendering &&
+                    pageInput && 
+                    parseInt(pageInput.value) === targetPage
+                );
+                
+                if (isPageReady || Date.now() - startTime > maxWait) {
+                    console.log('✅ Page prête en', Date.now() - startTime, 'ms');
+                    resolve();
+                } else {
+                    setTimeout(checkPageReady, 100);
+                }
+            };
             
-            pdfDoc.getPage(num).then(function(page) {
-                const viewport = page.getViewport({ scale: scale });
+            checkPageReady();
+        });
+    }
+
+    // 🚀 PRÉCHARGEMENT ANTICIPÉ DE LA PAGE SUIVANTE
+    async preloadNextPageChunks(currentPage) {
+        if (this.isPreloadingNextPage || currentPage >= pdfDoc.numPages) {
+            return;
+        }
+        
+        this.isPreloadingNextPage = true;
+        
+        try {
+            console.log(`🔄 Préchargement anticipé page ${currentPage + 1}`);
+            
+            this.nextPageText = await this.extractTextFromNextPage(currentPage);
+            
+            if (this.nextPageText && this.nextPageText.length > 10) {
+                this.nextPageChunks = this.splitTextIntoChunks(this.nextPageText);
+                console.log(`✂️ Page ${currentPage + 1} : ${this.nextPageChunks.length} chunks créés`);
                 
-                // Configuration canvas haute résolution
-                const outputScale = window.devicePixelRatio || 1;
-                canvas.width = Math.floor(viewport.width * outputScale);
-                canvas.height = Math.floor(viewport.height * outputScale);
-                canvas.style.width = Math.floor(viewport.width) + "px";
-                canvas.style.height = Math.floor(viewport.height) + "px";
+                // Précharger les premiers chunks de la page suivante
+                const chunksToPreload = Math.min(3, this.nextPageChunks.length); // 🔥 MOINS DE PRÉCHARGEMENT
                 
-                const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+                for (let i = 0; i < chunksToPreload; i++) {
+                    if (!this.isReading) break;
+                    
+                    const chunkId = `page${currentPage + 1}_chunk${i}_${Date.now()}`;
+                    const audioUrl = await this.generateAudioUrl(this.nextPageChunks[i], chunkId);
+                    
+                    if (audioUrl) {
+                        const audio = new Audio(audioUrl);
+                        audio.playbackRate = this.readingSpeed;
+                        audio.preload = 'auto';
+                        audio.load();
+                        
+                        this.nextPagePreloaded.set(i, audio);
+                        console.log(`✅ Page suivante chunk ${i} préchargé`);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ Erreur préchargement page suivante:', error);
+        } finally {
+            this.isPreloadingNextPage = false;
+        }
+    }
+
+    async preloadNextChunks(startIndex) {
+        console.log(`🔄 Préchargement depuis ${startIndex}`);
+        
+        for (let i = 0; i < this.preloadCount && (startIndex + i) < this.textChunks.length; i++) {
+            const index = startIndex + i;
+            if (!this.preloadedAudios.has(index)) {
+                this.preloadChunk(index).catch(error => {
+                    console.warn(`⚠️ Préchargement chunk ${index} échoué:`, error.message);
+                });
+            }
+        }
+    }
+
+    async preloadChunk(index) {
+        if (index >= this.textChunks.length) return;
+        
+        try {
+            const cacheKey = `${this.currentPageNumber}_${index}_${this.readingSpeed}`;
+            let audioUrl = this.audioCache.get(cacheKey);
+            
+            if (!audioUrl) {
+                const chunkId = `page${this.currentPageNumber}_chunk${index}_${Date.now()}`;
+                audioUrl = await this.generateAudioUrl(this.textChunks[index], chunkId);
+            }
+            
+            if (audioUrl) {
+                const audio = new Audio(audioUrl);
+                audio.playbackRate = this.readingSpeed;
+                audio.preload = 'auto';
+                audio.load();
                 
-                const renderContext = {
-                    canvasContext: ctx,
-                    viewport: viewport,
-                    transform: transform
+                this.preloadedAudios.set(index, audio);
+                this.audioCache.set(cacheKey, audioUrl);
+                console.log(`✅ Chunk ${index} préchargé`);
+            }
+        } catch (error) {
+            console.error(`❌ Erreur préchargement chunk ${index}:`, error);
+        }
+    }
+
+    async generateAudioUrl(text, chunkId) {
+        try {
+            const formData = new FormData();
+            formData.append('text', text);
+            formData.append('chunk_id', chunkId);
+            formData.append('speed', this.readingSpeed.toString());
+            
+            const response = await fetch('tts_piper.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
+            
+            const responseText = await response.text();
+            let data;
+            
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('❌ Erreur parsing JSON:', parseError);
+                throw new Error('Réponse serveur non-JSON');
+            }
+            
+            if (data.success) {
+                return data.audio_url;
+            } else {
+                throw new Error(data.error || 'Erreur serveur inconnue');
+            }
+            
+        } catch (error) {
+            console.error('❌ Erreur génération audio:', error);
+            return null;
+        }
+    }
+
+    // 🔧 LECTURE PRINCIPALE AVEC CONTINUITÉ PARFAITE
+    async readCurrentPage(isContinuation = false) {
+        if (!isContinuation && this.isReading && !this.isPaused) {
+            this.pauseReading();
+            return;
+        }
+        
+        if (!isContinuation && this.isPaused) {
+            this.resumeReading();
+            return;
+        }
+
+        if (this.isProcessing) {
+            console.log('🔒 Lecture déjà en cours, ignoré');
+            return;
+        }
+
+        this.isProcessing = true;
+
+        try {
+            console.log('🎵 Début lecture BRUTE page', pageNum);
+            this.isReading = true;
+            this.isPaused = false;
+            this.currentPageNumber = pageNum;
+            
+            if (!isContinuation) {
+                this.showLoadingIndicator();
+                this.enableContinuousMode();
+            }
+            
+            // 🚀 UTILISER LES CHUNKS PRÉCHARGÉS SI DISPONIBLES
+            if (isContinuation && this.nextPageChunks.length > 0) {
+                console.log('🔄 Utilisation des chunks préchargés de la page suivante');
+                this.textChunks = this.nextPageChunks;
+                this.preloadedAudios = this.nextPagePreloaded;
+                
+                // Réinitialiser pour la prochaine page
+                this.nextPageChunks = [];
+                this.nextPagePreloaded = new Map();
+                this.nextPageText = '';
+            } else {
+                const pageText = await this.extractTextFromCurrentPage();
+                
+                if (!pageText || pageText.length < 10) {
+                    this.hideLoadingIndicator();
+                    
+                    if (isContinuation && pageNum < pdfDoc.numPages) {
+                        console.log('📄 Page vide, passage à la suivante...');
+                        await this.goToNextPageAndContinue();
+                    } else {
+                        showAlert('warning', 'Aucun texte détecté sur cette page');
+                        this.stopReading(false);
+                    }
+                    return;
+                }
+
+                this.textChunks = this.splitTextIntoChunks(pageText);
+                console.log(`✂️ Chunks BRUTS créés: ${this.textChunks.length}`);
+                
+                await this.preloadNextChunks(0);
+            }
+            
+            this.updateButtonState('playing');
+            
+            // 🎵 LECTURE SÉQUENTIELLE COMPLÈTE
+            for (let i = 0; i < this.textChunks.length; i++) {
+                if (!this.isReading) {
+                    console.log('🛑 Lecture arrêtée par l\'utilisateur');
+                    break;
+                }
+                
+                if (!this.continuousMode && this.currentPageNumber !== pageNum) {
+                    console.log('📄 Page changée manuellement, arrêt');
+                    this.stopReading(false);
+                    return;
+                }
+                
+                if (this.isPaused) {
+                    await this.waitForResume();
+                }
+                
+                if (!this.isReading) break;
+                
+                this.currentChunkIndex = i;
+                console.log(`🎵 Lecture chunk BRUT ${i + 1}/${this.textChunks.length} (Page ${this.currentPageNumber})`);
+                console.log(`📝 Contenu BRUT: "${this.textChunks[i].substring(0, 50)}..."`);
+                
+                // 🚀 PRÉCHARGEMENT ANTICIPÉ DE LA PAGE SUIVANTE
+                const remainingChunks = this.textChunks.length - i;
+                if (remainingChunks <= this.anticipationThreshold && 
+                    this.currentPageNumber < pdfDoc.numPages &&
+                    !this.isPreloadingNextPage) {
+                    
+                    console.log(`🔮 Anticipation : ${remainingChunks} chunks restants, préchargement page suivante`);
+                    this.preloadNextPageChunks(this.currentPageNumber);
+                }
+                
+                // Préchargement normal
+                if (i < this.textChunks.length - 1) {
+                    const nextIndex = i + 1;
+                    if (!this.preloadedAudios.has(nextIndex)) {
+                        this.preloadChunk(nextIndex).catch(() => {});
+                    }
+                }
+                
+                this.updateButtonStateWithProgress(i + 1, this.textChunks.length);
+                
+                await this.playChunkSafe(i);
+            }
+            
+            // 🚀 VÉRIFICATION COMPLÈTE
+            console.log(`📊 Page ${this.currentPageNumber} - Status: ${this.currentChunkIndex + 1}/${this.textChunks.length} chunks`);
+            
+            if (this.isReading && this.currentChunkIndex >= this.textChunks.length - 1) {
+                if (this.currentPageNumber < pdfDoc.numPages) {
+                    console.log('📄 Page complète → Passage automatique à la suivante');
+                    await this.goToNextPageAndContinue();
+                } else {
+                    console.log('📚 Fin du livre atteinte !');
+                    this.showCompletionMessage();
+                    this.stopReading(false);
+                }
+            } else if (this.isReading) {
+                console.log(`⚠️ Page incomplète détectée: ${this.currentChunkIndex + 1}/${this.textChunks.length}`);
+                if (this.currentPageNumber < pdfDoc.numPages) {
+                    await this.goToNextPageAndContinue();
+                } else {
+                    this.stopReading(false);
+                }
+            }
+            
+        } catch (error) {
+            console.error('❌ Erreur lecture page:', error);
+            this.hideLoadingIndicator();
+            this.stopReading(false);
+        } finally {
+            this.isProcessing = false;
+        }
+    }
+
+    async playChunkSafe(index) {
+        if (!this.isReading) return;
+        
+        try {
+            let audio = this.preloadedAudios.get(index);
+            
+            if (!audio) {
+                console.log(`⚡ Chunk ${index} non préchargé, génération...`);
+                const chunkId = `page${this.currentPageNumber}_chunk${index}_${Date.now()}`;
+                const audioUrl = await this.generateAudioUrl(this.textChunks[index], chunkId);
+                
+                if (!audioUrl) {
+                    console.warn(`⚠️ Impossible de générer audio pour chunk ${index}`);
+                    return;
+                }
+                
+                audio = new Audio(audioUrl);
+                audio.playbackRate = this.readingSpeed;
+            }
+            
+            this.currentAudio = audio;
+            
+            if (index === 0) {
+                audio.addEventListener('play', () => {
+                    this.hideLoadingIndicator();
+                }, { once: true });
+            }
+            
+            await new Promise((resolve, reject) => {
+                let resolved = false;
+                
+                const cleanup = () => {
+                    if (!resolved) {
+                        resolved = true;
+                        this.cleanupAudio(index);
+                        resolve();
+                    }
                 };
                 
-                page.render(renderContext).promise.then(function() {
-                    pageRendering = false;
-                    document.getElementById('loadingSpinner').style.display = 'none';
-                    
-                    // Mettre à jour l'interface
-                    document.getElementById('pageInput').value = num;
-                    document.getElementById('currentPageNote').textContent = num;
-                    
-                    // Sauvegarder la progression
-                    saveProgress(num);
-                    loadNoteForPage(num);
-                    
-                    if (pageNumPending !== null) {
-                        renderPage(pageNumPending);
-                        pageNumPending = null;
+                audio.onended = cleanup;
+                audio.onerror = (error) => {
+                    console.warn(`⚠️ Erreur audio chunk ${index}:`, error);
+                    cleanup();
+                };
+                
+                const timeout = setTimeout(() => {
+                    if (!resolved) {
+                        console.warn(`⏱️ Timeout chunk ${index}`);
+                        cleanup();
                     }
+                }, 60000); // 🔥 PLUS DE TEMPS POUR GROS CHUNKS
+                
+                audio.play().then(() => {
+                    clearTimeout(timeout);
+                }).catch((playError) => {
+                    console.warn(`⚠️ Erreur play chunk ${index}:`, playError);
+                    clearTimeout(timeout);
+                    cleanup();
                 });
             });
+            
+        } catch (error) {
+            console.warn(`⚠️ Erreur lecture chunk ${index}:`, error);
+        }
+    }
+
+    async goToNextPageAndContinue() {
+        console.log('📄 Transition fluide vers la page suivante...');
+        
+        this.isProcessing = true;
+        
+        const hasPreloadedNext = this.nextPageChunks.length > 0;
+        
+        if (!hasPreloadedNext) {
+            this.resetForNewPage();
         }
         
-        // Navigation
-        function queueRenderPage(num) {
-            if (pageRendering) {
-                pageNumPending = num;
-            } else {
-                renderPage(num);
+        if (typeof onNextPage === 'function') {
+            onNextPage();
+            
+            await new Promise(resolve => setTimeout(resolve, hasPreloadedNext ? 50 : 150));
+            
+            if (!hasPreloadedNext) {
+                await this.waitForPageRender(pageNum, 1000);
+            }
+            
+            this.currentPageNumber = pageNum;
+            
+            if (this.isReading) {
+                console.log(`🔄 Continuation ${hasPreloadedNext ? 'fluide' : 'normale'} sur page ${pageNum}`);
+                this.isProcessing = false;
+                await this.readCurrentPage(true);
+            }
+        } else {
+            console.error('❌ Fonction onNextPage non trouvée');
+            this.stopReading(false);
+            this.isProcessing = false;
+        }
+    }
+
+    cleanupAudio(index) {
+        const audio = this.preloadedAudios.get(index);
+        if (audio) {
+            audio.pause();
+            audio.src = '';
+            this.preloadedAudios.delete(index);
+        }
+    }
+
+    resetForNewPage() {
+        this.preloadedAudios.clear();
+        this.textChunks = [];
+        this.currentChunkIndex = 0;
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio = null;
+        }
+    }
+
+    pauseReading() {
+        if (this.currentAudio && !this.isPaused) {
+            this.isPaused = true;
+            this.currentAudio.pause();
+            console.log('⏸️ Lecture en pause');
+            this.updateButtonState('paused');
+        }
+    }
+
+    resumeReading() {
+        if (this.currentAudio && this.isPaused) {
+            this.isPaused = false;
+            this.currentAudio.play();
+            console.log('▶️ Reprise de la lecture');
+            this.updateButtonState('playing');
+        }
+    }
+
+    async waitForResume() {
+        while (this.isPaused && this.isReading) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+    }
+
+    stopReading(showError = true) {
+        this.isReading = false;
+        this.isPaused = false;
+        this.isProcessing = false;
+        this.continuousMode = false;
+        
+        if (this.currentAudio) {
+            this.currentAudio.pause();
+            this.currentAudio = null;
+        }
+        
+        this.preloadedAudios.clear();
+        this.nextPagePreloaded.clear();
+        this.nextPageChunks = [];
+        this.nextPageText = '';
+        this.isPreloadingNextPage = false;
+        
+        this.updateButtonState('stopped');
+        this.hideLoadingIndicator();
+        
+        console.log('🛑 Lecture arrêtée');
+    }
+
+    enableContinuousMode() {
+        this.continuousMode = true;
+        console.log('🔄 Mode continu activé');
+    }
+
+    disableContinuousMode() {
+        this.continuousMode = false;
+        console.log('⏹️ Mode continu désactivé');
+    }
+
+    destroy() {
+        if (this.pageWatcher) {
+            clearInterval(this.pageWatcher);
+            this.pageWatcher = null;
+        }
+        this.stopReading(false);
+        console.log('🧹 AudioReader détruit');
+    }
+
+    setSpeed(speed) {
+        this.readingSpeed = Math.max(0.5, Math.min(2.0, speed));
+        if (this.currentAudio) {
+            this.currentAudio.playbackRate = this.readingSpeed;
+        }
+        console.log(`🎵 Vitesse: ${this.readingSpeed}x`);
+    }
+
+    showLoadingIndicator() {
+        const spinner = document.getElementById('loadingSpinner');
+        if (spinner) {
+            spinner.style.display = 'block';
+        }
+    }
+
+    hideLoadingIndicator() {
+        const spinner = document.getElementById('loadingSpinner');
+        if (spinner) {
+            spinner.style.display = 'none';
+        }
+    }
+
+    updateButtonStateWithProgress(current, total) {
+        const btn = document.getElementById('audioToggleBtn');
+        if (btn) {
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.className = 'fas fa-pause';
+                btn.title = `Lecture BRUTE (${current}/${total}) - Page ${this.currentPageNumber}`;
             }
         }
-        
-        function onPrevPage() {
-            if (pageNum <= 1) return;
-            pageNum--;
-            queueRenderPage(pageNum);
+    }
+
+    updateButtonState(state) {
+        const btn = document.getElementById('audioToggleBtn');
+        if (btn) {
+            const icon = btn.querySelector('i');
+            if (icon) {
+                switch(state) {
+                    case 'playing':
+                        icon.className = 'fas fa-pause';
+                        btn.title = 'Pause (Mode BRUT)';
+                        btn.classList.add('audio-loading-pulse');
+                        break;
+                    case 'paused':
+                        icon.className = 'fas fa-play';
+                        btn.title = 'Reprendre la lecture BRUTE';
+                        btn.classList.remove('audio-loading-pulse');
+                        break;
+                    default:
+                        icon.className = 'fas fa-volume-up';
+                        btn.title = 'Lecture audio BRUTE complète';
+                        btn.classList.remove('audio-loading-pulse');
+                }
+            }
         }
+    }
+
+    showCompletionMessage() {
+        const alert = document.createElement('div');
+        alert.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white p-6 rounded-lg shadow-xl z-50 text-center';
+        alert.innerHTML = `
+            <div class="text-2xl mb-2">🎉</div>
+            <h3 class="text-lg font-bold mb-2">Félicitations !</h3>
+            <p>Vous avez terminé le livre !</p>
+            <p class="text-sm mt-2">Lecture BRUTE terminée</p>
+        `;
         
-        function onNextPage() {
-            if (pageNum >= pdfDoc.numPages) return;
-            pageNum++;
-            queueRenderPage(pageNum);
+        document.body.appendChild(alert);
+        setTimeout(() => alert.remove(), 5000);
+    }
+
+    getDetailedState() {
+        return {
+            isReading: this.isReading,
+            isPaused: this.isPaused,
+            isProcessing: this.isProcessing,
+            continuousMode: this.continuousMode,
+            currentPage: this.currentPageNumber,
+            actualPage: pageNum,
+            currentChunk: this.currentChunkIndex + 1,
+            totalChunks: this.textChunks.length,
+            preloadedCount: this.preloadedAudios.size,
+            nextPageChunks: this.nextPageChunks.length,
+            nextPagePreloaded: this.nextPagePreloaded.size,
+            isPreloadingNextPage: this.isPreloadingNextPage,
+            cacheSize: this.audioCache.size,
+            chunkSize: this.chunkSize
+        };
+    }
+}
+
+// INITIALISATION GLOBALE
+let audioReader = null;
+
+function setupCleanupEvents() {
+    window.addEventListener('beforeunload', function(e) {
+        console.log('🧹 Nettoyage avant fermeture');
+        if (audioReader) {
+            audioReader.destroy();
         }
-        
-        // Zoom
-        function zoomIn() {
-            scale = Math.min(scale + 0.25, isMobile() ? 5.0 : 3.0);
-            document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
-            queueRenderPage(pageNum);
-        }
-        
-        function zoomOut() {
-            scale = Math.max(scale - 0.25, isMobile() ? 1.0 : 0.5);
-            document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
-            queueRenderPage(pageNum);
-        }
-        
-        // Gestion du panneau latéral
-        function openSidePanel() {
-            document.getElementById('sidePanel').classList.add('open');
-        }
-        
-        function closeSidePanel() {
-            document.getElementById('sidePanel').classList.remove('open');
-        }
-        
-        // Changement d'onglet
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('border-blue-600', 'text-blue-600');
-                btn.classList.add('text-gray-600');
-            });
+    });
+}
+
+function setupSimplePageDetection() {
+    console.log('📄 Configuration détection simple des changements de page');
+    
+    let checkPageInterval = setInterval(() => {
+        if (typeof pageNum !== 'undefined' && pageNum !== lastKnownPage) {
+            console.log('📄 Variable pageNum changée:', lastKnownPage, '->', pageNum);
             
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
+            if (audioReader && !audioReader.isProcessing && !audioReader.continuousMode) {
+                audioReader.handlePageChange();
+            }
             
-            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-            activeBtn.classList.add('border-blue-600', 'text-blue-600');
-            activeBtn.classList.remove('text-gray-600');
+            lastKnownPage = pageNum;
+        }
+    }, 500);
+}
+
+// 🚀 FONCTION AUDIO SIMPLIFIÉE
+function handleAudioClick() {
+    console.log('🎵 Clic audio BRUT détecté - Page courante:', pageNum);
+    
+    if (!audioReader) {
+        console.log('🔧 Initialisation AudioReader ULTRA-SIMPLE...');
+        audioReader = new AudioReader();
+        audioReader.setupPageChangeDetection();
+    }
+    
+    if (!pdfDoc) {
+        console.error('❌ PDF non chargé');
+        showAlert('warning', 'Veuillez attendre que le livre soit chargé');
+        return;
+    }
+    
+    audioReader.currentPageNumber = pageNum;
+    lastKnownPage = pageNum;
+    
+    console.log('🚀 Lancement lecture BRUTE sur page', pageNum);
+    audioReader.readCurrentPage(false);
+}
+
+// 🚀 FONCTIONS DE DEBUG
+function debugAudioState() {
+    if (audioReader) {
+        const state = audioReader.getDetailedState();
+        console.log('🔍 État AudioReader BRUT:', state);
+        return state;
+    } else {
+        console.log('❌ AudioReader non initialisé');
+        return null;
+    }
+}
+
+function forceNextPage() {
+    if (audioReader && audioReader.isReading) {
+        console.log('🔧 Forçage passage page suivante...');
+        audioReader.goToNextPageAndContinue();
+    }
+}
+
+function toggleContinuousMode() {
+    if (audioReader) {
+        if (audioReader.continuousMode) {
+            audioReader.disableContinuousMode();
+            console.log('⏹️ Mode continu désactivé');
+        } else {
+            audioReader.enableContinuousMode();
+            console.log('🔄 Mode continu activé');
+        }
+    }
+}
+
+// Fonctions exposées globalement pour debug
+window.debugAudio = debugAudioState;
+window.forceNextPage = forceNextPage;
+window.toggleContinuous = toggleContinuousMode;
+
+// TOUTES LES AUTRES FONCTIONS (PDF, navigation, etc.) - INCHANGÉES
+function loadPDF() {
+    try {
+        document.getElementById('loadingSpinner').style.display = 'block';
+        
+        pdfjsLib.getDocument('<?php echo addslashes($book_path); ?>').promise.then(function(pdf) {
+            pdfDoc = pdf;
+            document.getElementById('totalPages').textContent = pdf.numPages;
             
-            document.getElementById(tabName + 'Tab').classList.remove('hidden');
+            if (!isMobile()) {
+                scale = 1.5;
+                document.getElementById('zoomLevel').textContent = '150%';
+            }
+
+            document.getElementById('pageInput').max = pdf.numPages;
             
-            const titles = {
-                'notes': 'Notes',
-                'bookmarks': 'Signets',
-                'info': 'Informations'
+            renderPage(pageNum);
+            console.log('✅ PDF chargé avec succès');
+             
+        }).catch(function(error) {
+            console.error('❌ Erreur lors du chargement du PDF:', error);
+            showAlert('error', 'Erreur lors du chargement du livre');
+        });
+    } catch (error) {
+        console.error('❌ Erreur loadPDF:', error);
+        showAlert('error', 'Erreur lors du chargement du livre');
+    }
+}
+
+function renderPage(num) {
+    try {
+        pageRendering = true;
+        document.getElementById('loadingSpinner').style.display = 'block';
+        
+        pdfDoc.getPage(num).then(function(page) {
+            const viewport = page.getViewport({ scale: scale });
+            
+            const outputScale = window.devicePixelRatio || 1;
+            canvas.width = Math.floor(viewport.width * outputScale);
+            canvas.height = Math.floor(viewport.height * outputScale);
+            canvas.style.width = Math.floor(viewport.width) + "px";
+            canvas.style.height = Math.floor(viewport.height) + "px";
+            
+            const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+            
+            const renderContext = {
+                canvasContext: ctx,
+                viewport: viewport,
+                transform: transform
             };
-            document.getElementById('panelTitle').textContent = titles[tabName] || 'Notes';
-        }
-        
-        // Gestion de la notation
-        function showRatingModal() {
-            document.getElementById('ratingModal').classList.remove('hidden');
-        }
-        
-        function hideRatingModal() {
-            document.getElementById('ratingModal').classList.add('hidden');
-            selectedRating = 0;
-            updateStarDisplay();
-            document.getElementById('ratingComment').value = '';
-        }
-        
-        function updateStarDisplay() {
-            document.querySelectorAll('.star').forEach((star, index) => {
-                if (index < selectedRating) {
-                    star.classList.add('active');
-                } else {
-                    star.classList.remove('active');
-                }
-            });
-        }
-        
-        function submitRating() {
-            if (selectedRating === 0) {
-                alert('Veuillez sélectionner une note');
-                return;
-            }
             
-            const comment = document.getElementById('ratingComment').value.trim();
-            
-            $.ajax({
-                url: 'ajax/save_rating.php',
-                type: 'POST',
-                data: {
-                    book_id: bookId,
-                    rating: selectedRating,
-                    comment_text: comment
-                },
-                success: function(response) {
-                    try {
-                        const data = typeof response === 'string' ? JSON.parse(response) : response;
-                        if (data.success) {
-                            showAlert('success', 'Merci pour votre notation !');
-                            hideRatingModal();
-                            setTimeout(() => location.reload(), 1500);
-                        }
-                    } catch (e) {
-                        console.error('Erreur:', e);
-                    }
-                }
-            });
-        }
-        
-        // Sauvegarder la progression
-        function saveProgress(pageNumber) {
-            $.ajax({
-                url: 'ajax/save_progress.php',
-                type: 'POST',
-                data: {
-                    book_id: bookId,
-                    page_number: pageNumber
-                }
-            });
-        }
-        
-        // Charger les notes
-        function loadNotes() {
-            $.ajax({
-                url: 'ajax/get_notes.php',
-                type: 'GET',
-                data: { book_id: bookId },
-                success: function(response) {
-                    try {
-                        const data = typeof response === 'string' ? JSON.parse(response) : response;
-                        const notesList = document.getElementById('notesList');
-                        
-                        if (data.success && data.notes && data.notes.length > 0) {
-                            notesList.innerHTML = data.notes.map(note => `
-                                <div class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100" 
-                                     onclick="goToPage(${note.page_number})">
-                                    <div class="flex justify-between mb-1">
-                                        <span class="font-medium text-blue-600 text-sm">Page ${note.page_number}</span>
-                                        <span class="text-xs text-gray-500">${formatDate(note.created_at)}</span>
-                                    </div>
-                                    <p class="text-gray-700 text-xs">${note.note_text}</p>
-                                </div>
-                            `).join('');
-                        } else {
-                            notesList.innerHTML = '<p class="text-gray-500 text-center text-sm">Aucune note</p>';
-                        }
-                    } catch (e) {
-                        console.error('Erreur parsing notes:', e);
-                    }
-                }
-            });
-        }
-        
-        function loadNoteForPage(pageNumber) {
-            document.getElementById('noteText').value = '';
-            currentNote = null;
-            
-            $.ajax({
-                url: 'ajax/get_note_for_page.php',
-                type: 'GET',
-                data: {
-                    book_id: bookId,
-                    page_number: pageNumber
-                },
-                success: function(response) {
-                    try {
-                        const data = typeof response === 'string' ? JSON.parse(response) : response;
-                        if (data.success && data.note) {
-                            document.getElementById('noteText').value = data.note.note_text;
-                            currentNote = data.note;
-                        }
-                    } catch (e) {
-                        console.error('Erreur parsing note:', e);
-                    }
-                }
-            });
-        }
-        
-        function saveNote() {
-            const noteText = document.getElementById('noteText').value.trim();
-            if (!noteText) {
-                alert('Veuillez écrire une note avant de l\'enregistrer.');
-                return;
-            }
-            
-            $.ajax({
-                url: 'ajax/save_note.php',
-                type: 'POST',
-                data: {
-                    book_id: bookId,
-                    page_number: pageNum,
-                    note_text: noteText,
-                    note_id: currentNote ? currentNote.id : null
-                },
-                success: function(response) {
-                    try {
-                        const data = typeof response === 'string' ? JSON.parse(response) : response;
-                        if (data.success) {
-                            showAlert('success', 'Note enregistrée !');
-                            loadNotes();
-                        }
-                    } catch (e) {
-                        console.error('Erreur:', e);
-                    }
-                }
-            });
-        }
-        
-        // Charger les signets
-        function loadBookmarks() {
-            $.ajax({
-                url: 'ajax/get_bookmarks.php',
-                type: 'GET',
-                data: { book_id: bookId },
-                success: function(response) {
-                    try {
-                        const data = typeof response === 'string' ? JSON.parse(response) : response;
-                        const bookmarksList = document.getElementById('bookmarksList');
-                        
-                        if (data.success && data.bookmarks && data.bookmarks.length > 0) {
-                            bookmarksList.innerHTML = data.bookmarks.map(bookmark => `
-                                <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
-                                    <div class="cursor-pointer hover:text-blue-600" onclick="goToPage(${bookmark.page_number})">
-                                        <div class="font-medium text-sm">${bookmark.bookmark_name || 'Sans nom'}</div>
-                                        <div class="text-xs text-gray-500">Page ${bookmark.page_number}</div>
-                                    </div>
-                                    <button onclick="deleteBookmark(${bookmark.id})" 
-                                            class="text-red-500 hover:text-red-700">
-                                        <i class="fas fa-trash text-sm"></i>
-                                    </button>
-                                </div>
-                            `).join('');
-                        } else {
-                            bookmarksList.innerHTML = '<p class="text-gray-500 text-center text-sm">Aucun signet</p>';
-                        }
-                    } catch (e) {
-                        console.error('Erreur parsing bookmarks:', e);
-                    }
-                }
-            });
-        }
-        
-        function saveBookmark() {
-            const bookmarkName = document.getElementById('bookmarkName').value.trim();
-            
-            $.ajax({
-                url: 'ajax/save_bookmark.php',
-                type: 'POST',
-                data: {
-                    book_id: bookId,
-                    page_number: pageNum,
-                    bookmark_name: bookmarkName
-                },
-                success: function(response) {
-                    try {
-                        const data = typeof response === 'string' ? JSON.parse(response) : response;
-                        if (data.success) {
-                            showAlert('success', 'Signet ajouté !');
-                            document.getElementById('bookmarkName').value = '';
-                            loadBookmarks();
-                        }
-                    } catch (e) {
-                        console.error('Erreur:', e);
-                    }
-                }
-            });
-        }
-        
-        function deleteBookmark(bookmarkId) {
-            if (!confirm('Supprimer ce signet ?')) return;
-            
-            $.ajax({
-                url: 'ajax/delete_bookmark.php',
-                type: 'POST',
-                data: { bookmark_id: bookmarkId },
-                success: function(response) {
-                    try {
-                        const data = typeof response === 'string' ? JSON.parse(response) : response;
-                        if (data.success) {
-                            showAlert('success', 'Signet supprimé');
-                            loadBookmarks();
-                        }
-                    } catch (e) {
-                        console.error('Erreur:', e);
-                    }
-                }
-            });
-        }
-        
-        function goToPage(page) {
-            pageNum = parseInt(page);
-            queueRenderPage(pageNum);
-            closeSidePanel();
-        }
-        
-        function showAlert(type, message) {
-            const alert = document.createElement('div');
-            alert.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 ${
-                type === 'success' ? 'bg-green-500' : 'bg-red-500'
-            }`;
-            alert.innerHTML = `<div class="flex items-center gap-2">
-                <i class="fas fa-${type === 'success' ? 'check' : 'times'}-circle"></i>
-                <span class="text-sm">${message}</span>
-            </div>`;
-            
-            document.body.appendChild(alert);
-            setTimeout(() => alert.remove(), 3000);
-        }
-        
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            return date.toLocaleDateString('fr-FR', {
-                day: '2-digit',
-                month: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-        
-        // Navigation tactile
-        function setupTouchNavigation() {
-            if (!isMobile()) return;
-            
-            let touchStartX = 0;
-            let touchStartY = 0;
-            let touchEndX = 0;
-            let touchEndY = 0;
-            let lastTap = 0;
-            
-            const touchArea = document.getElementById('touchArea');
-            
-            touchArea.addEventListener('touchstart', function(e) {
-                touchStartX = e.changedTouches[0].screenX;
-                touchStartY = e.changedTouches[0].screenY;
-            }, { passive: true });
-            
-            touchArea.addEventListener('touchend', function(e) {
-                touchEndX = e.changedTouches[0].screenX;
-                touchEndY = e.changedTouches[0].screenY;
+            page.render(renderContext).promise.then(function() {
+                pageRendering = false;
+                document.getElementById('loadingSpinner').style.display = 'none';
                 
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTap;
+                document.getElementById('pageInput').value = num;
+                document.getElementById('currentPageNote').textContent = num;
                 
-                // Double tap pour zoom
-                // if (tapLength < 500 && tapLength > 0) {
-                //     if (scale > 3.0) {
-                //         scale = 2.0;
-                //     } else {
-                //         scale = 4.0;
-                //     }
-                //     document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
-                //     queueRenderPage(pageNum);
-                //     return;
-                // }
+                saveProgress(num);
+                loadNoteForPage(num);
                 
-                lastTap = currentTime;
-                handleSwipe();
-            }, { passive: true });
-            
-            function handleSwipe() {
-                const xDiff = touchStartX - touchEndX;
-                const yDiff = touchStartY - touchEndY;
-                const threshold = 50;
-                
-                if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > threshold) {
-                    if (xDiff > 0) {
-                        onNextPage();
-                    } else {
-                        onPrevPage();
-                    }
+                if (pageNumPending !== null) {
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
                 }
-            }
-            
-            document.getElementById('touchLeft').addEventListener('click', onPrevPage);
-            document.getElementById('touchRight').addEventListener('click', onNextPage);
+            });
+        }).catch(function(error) {
+            console.error('❌ Erreur rendu page:', error);
+            pageRendering = false;
+            document.getElementById('loadingSpinner').style.display = 'none';
+        });
+    } catch (error) {
+        console.error('❌ Erreur renderPage:', error);
+        pageRendering = false;
+        document.getElementById('loadingSpinner').style.display = 'none';
+    }
+}
+
+function queueRenderPage(num) {
+    if (pageRendering) {
+        pageNumPending = num;
+    } else {
+        renderPage(num);
+    }
+}
+
+function onPrevPage() {
+    if (pageNum <= 1) return;
+    pageNum--;
+    queueRenderPage(pageNum);
+}
+
+function onNextPage() {
+    if (pageNum >= pdfDoc.numPages) return;
+    pageNum++;
+    queueRenderPage(pageNum);
+}
+
+function zoomIn() {
+    scale = Math.min(scale + 0.25, isMobile() ? 5.0 : 3.0);
+    document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
+    queueRenderPage(pageNum);
+}
+
+function zoomOut() {
+    scale = Math.max(scale - 0.25, isMobile() ? 1.0 : 0.5);
+    document.getElementById('zoomLevel').textContent = Math.round(scale * 100) + '%';
+    queueRenderPage(pageNum);
+}
+
+function openSidePanel() {
+    document.getElementById('sidePanel').classList.add('open');
+}
+
+function closeSidePanel() {
+    document.getElementById('sidePanel').classList.remove('open');
+}
+
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-blue-600', 'text-blue-600');
+        btn.classList.add('text-gray-600');
+    });
+    
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+    activeBtn.classList.add('border-blue-600', 'text-blue-600');
+    activeBtn.classList.remove('text-gray-600');
+    
+    document.getElementById(tabName + 'Tab').classList.remove('hidden');
+    
+    const titles = {
+        'notes': 'Notes',
+        'bookmarks': 'Signets',
+        'info': 'Informations'
+    };
+    document.getElementById('panelTitle').textContent = titles[tabName] || 'Notes';
+}
+
+function showRatingModal() {
+    document.getElementById('ratingModal').classList.remove('hidden');
+}
+
+function hideRatingModal() {
+    document.getElementById('ratingModal').classList.add('hidden');
+    selectedRating = 0;
+    updateStarDisplay();
+    document.getElementById('ratingComment').value = '';
+}
+
+function updateStarDisplay() {
+    document.querySelectorAll('.star').forEach((star, index) => {
+        if (index < selectedRating) {
+            star.classList.add('active');
+        } else {
+            star.classList.remove('active');
         }
-        
-        // INITIALISATION
-        document.addEventListener('DOMContentLoaded', function() {
-            // Force le masquage du modal
-            const ratingModal = document.getElementById('ratingModal');
-            if (ratingModal) {
-                ratingModal.classList.add('hidden');
-                ratingModal.style.display = 'none';
-            }
-            
-            // Charger le PDF
-            loadPDF();
-            
-            // Configuration tactile
-            setupTouchNavigation();
-            
-            // Navigation
-            document.getElementById('prevBtn').addEventListener('click', onPrevPage);
-            document.getElementById('nextBtn').addEventListener('click', onNextPage);
-            
-            document.getElementById('pageInput').addEventListener('change', function() {
-                const page = parseInt(this.value);
-                if (page >= 1 && page <= pdfDoc.numPages) {
-                    pageNum = page;
-                    queueRenderPage(pageNum);
-                }
-            });
-            
-            // Zoom
-            document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
-            document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
-            
-            // Panneau latéral
-            document.getElementById('notesBtn').addEventListener('click', function() {
-                switchTab('notes');
-                openSidePanel();
-            });
-            
-            document.getElementById('bookmarkBtn').addEventListener('click', function() {
-                switchTab('bookmarks');
-                openSidePanel();
-            });
-            
-            document.getElementById('closePanelBtn').addEventListener('click', closeSidePanel);
-            
-            // Onglets
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    switchTab(this.dataset.tab);
-                });
-            });
-            
-            // Notes et signets
-            document.getElementById('saveNoteBtn').addEventListener('click', saveNote);
-            document.getElementById('saveBookmarkBtn').addEventListener('click', saveBookmark);
-            
-            // Notation
-            <?php if (!$has_rated): ?>
-            document.getElementById('rateBtn').addEventListener('click', function(e) {
-                e.preventDefault();
-                showRatingModal();
-            });
-            document.getElementById('closeRatingModal').addEventListener('click', hideRatingModal);
-            document.getElementById('cancelRatingBtn').addEventListener('click', hideRatingModal);
-            document.getElementById('submitRatingBtn').addEventListener('click', submitRating);
-            
-            // Fermer modal sur arrière-plan
-            document.getElementById('ratingModal').addEventListener('click', function(e) {
-                if (e.target === this) {
+    });
+}
+
+function submitRating() {
+    if (selectedRating === 0) {
+        showAlert('warning', 'Veuillez sélectionner une note');
+        return;
+    }
+    
+    const comment = document.getElementById('ratingComment').value.trim();
+    
+    $.ajax({
+        url: 'ajax/save_rating.php',
+        type: 'POST',
+        data: {
+            book_id: bookId,
+            rating: selectedRating,
+            comment_text: comment
+        },
+        success: function(response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                if (data.success) {
+                    showAlert('success', 'Merci pour votre notation !');
                     hideRatingModal();
+                    setTimeout(() => location.reload(), 1500);
                 }
-            });
-            
-            // Étoiles
-            document.querySelectorAll('.star').forEach(star => {
-                star.addEventListener('click', function() {
-                    selectedRating = parseInt(this.dataset.rating);
-                    updateStarDisplay();
-                });
+            } catch (e) {
+                console.error('❌ Erreur:', e);
+            }
+        },
+        error: function() {
+            showAlert('error', 'Erreur lors de l\'envoi de la notation');
+        }
+    });
+}
+
+function saveProgress(pageNumber) {
+    $.ajax({
+        url: 'ajax/save_progress.php',
+        type: 'POST',
+        data: {
+            book_id: bookId,
+            page_number: pageNumber
+        },
+        error: function() {
+            console.warn('⚠️ Erreur sauvegarde progression (non-bloquante)');
+        }
+    });
+}
+
+function loadNotes() {
+    $.ajax({
+        url: 'ajax/get_notes.php',
+        type: 'GET',
+        data: { book_id: bookId },
+        success: function(response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                const notesList = document.getElementById('notesList');
                 
-                star.addEventListener('mouseenter', function() {
-                    const rating = parseInt(this.dataset.rating);
-                    document.querySelectorAll('.star').forEach((s, index) => {
-                        if (index < rating) {
-                            s.classList.add('active');
-                        } else {
-                            s.classList.remove('active');
-                        }
-                    });
-                });
-            });
-            
-            document.getElementById('starRating').addEventListener('mouseleave', updateStarDisplay);
-            <?php endif; ?>
-            
-            // Charger données
-            loadNotes();
-            loadBookmarks();
-            
-            // Navigation clavier
-            document.addEventListener('keydown', function(e) {
-                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (data.success && data.notes && data.notes.length > 0) {
+                    notesList.innerHTML = data.notes.map(note => `
+                        <div class="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100" 
+                             onclick="goToPage(${note.page_number})">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-medium text-blue-600 text-sm">Page ${note.page_number}</span>
+                                <span class="text-xs text-gray-500">${formatDate(note.created_at)}</span>
+                            </div>
+                            <p class="text-gray-700 text-xs">${note.note_text}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    notesList.innerHTML = '<p class="text-gray-500 text-center text-sm">Aucune note</p>';
+                }
+            } catch (e) {
+                console.error('❌ Erreur parsing notes:', e);
+            }
+        },
+        error: function() {
+            console.warn('⚠️ Erreur chargement notes (non-bloquante)');
+        }
+    });
+}
+
+function loadNoteForPage(pageNumber) {
+    document.getElementById('noteText').value = '';
+    currentNote = null;
+    
+    $.ajax({
+        url: 'ajax/get_note_for_page.php',
+        type: 'GET',
+        data: {
+            book_id: bookId,
+            page_number: pageNumber
+        },
+        success: function(response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                if (data.success && data.note) {
+                    document.getElementById('noteText').value = data.note.note_text;
+                    currentNote = data.note;
+                }
+            } catch (e) {
+                console.error('❌ Erreur parsing note:', e);
+            }
+        },
+        error: function() {
+            console.warn('⚠️ Erreur chargement note (non-bloquante)');
+        }
+    });
+}
+
+function saveNote() {
+    const noteText = document.getElementById('noteText').value.trim();
+    if (!noteText) {
+        showAlert('warning', 'Veuillez écrire une note avant de l\'enregistrer');
+        return;
+    }
+    
+    $.ajax({
+        url: 'ajax/save_note.php',
+        type: 'POST',
+        data: {
+            book_id: bookId,
+            page_number: pageNum,
+            note_text: noteText,
+            note_id: currentNote ? currentNote.id : null
+        },
+        success: function(response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                if (data.success) {
+                    showAlert('success', 'Note enregistrée !');
+                    loadNotes();
+                }
+            } catch (e) {
+                console.error('❌ Erreur:', e);
+            }
+        },
+        error: function() {
+            showAlert('error', 'Erreur lors de l\'enregistrement de la note');
+        }
+    });
+}
+
+function loadBookmarks() {
+    $.ajax({
+        url: 'ajax/get_bookmarks.php',
+        type: 'GET',
+        data: { book_id: bookId },
+        success: function(response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                const bookmarksList = document.getElementById('bookmarksList');
                 
-                switch(e.key) {
-                    case 'ArrowLeft':
-                    case 'PageUp':
-                        onPrevPage();
-                        break;
-                    case 'ArrowRight':
-                    case 'PageDown':
-                    case ' ':
-                        e.preventDefault();
-                        onNextPage();
-                        break;
-                    case 'Home':
-                        pageNum = 1;
-                        queueRenderPage(pageNum);
-                        break;
-                    case 'End':
-                        pageNum = pdfDoc.numPages;
-                        queueRenderPage(pageNum);
-                        break;
-                    case 'Escape':
-                        if (document.getElementById('sidePanel').classList.contains('open')) {
-                            closeSidePanel();
-                        }
-                        if (!document.getElementById('ratingModal').classList.contains('hidden')) {
-                            hideRatingModal();
-                        }
-                        break;
+                if (data.success && data.bookmarks && data.bookmarks.length > 0) {
+                    bookmarksList.innerHTML = data.bookmarks.map(bookmark => `
+                        <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center">
+                            <div class="cursor-pointer hover:text-blue-600" onclick="goToPage(${bookmark.page_number})">
+                                <div class="font-medium text-sm">${bookmark.bookmark_name || 'Sans nom'}</div>
+                                <div class="text-xs text-gray-500">Page ${bookmark.page_number}</div>
+                            </div>
+                            <button onclick="deleteBookmark(${bookmark.id})" 
+                                    class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    `).join('');
+                } else {
+                    bookmarksList.innerHTML = '<p class="text-gray-500 text-center text-sm">Aucun signet</p>';
                 }
-            });
-            
-            // Redimensionnement
-            window.addEventListener('resize', function() {
-                if (pdfDoc) {
-                    queueRenderPage(pageNum);
+            } catch (e) {
+                console.error('❌ Erreur parsing bookmarks:', e);
+            }
+        },
+        error: function() {
+            console.warn('⚠️ Erreur chargement signets (non-bloquante)');
+        }
+    });
+}
+
+function saveBookmark() {
+    const bookmarkName = document.getElementById('bookmarkName').value.trim();
+    
+    $.ajax({
+        url: 'ajax/save_bookmark.php',
+        type: 'POST',
+        data: {
+            book_id: bookId,
+            page_number: pageNum,
+            bookmark_name: bookmarkName
+        },
+        success: function(response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                if (data.success) {
+                    showAlert('success', 'Signet ajouté !');
+                    document.getElementById('bookmarkName').value = '';
+                    loadBookmarks();
                 }
-            });
-            
-            // Gestion orientation mobile
-            window.addEventListener('orientationchange', function() {
-                setTimeout(() => {
-                    if (pdfDoc) {
-                        queueRenderPage(pageNum);
-                    }
-                }, 100);
+            } catch (e) {
+                console.error('❌ Erreur:', e);
+            }
+        },
+        error: function() {
+            showAlert('error', 'Erreur lors de l\'ajout du signet');
+        }
+    });
+}
+
+function deleteBookmark(bookmarkId) {
+    if (!confirm('Supprimer ce signet ?')) return;
+    
+    $.ajax({
+        url: 'ajax/delete_bookmark.php',
+        type: 'POST',
+        data: { bookmark_id: bookmarkId },
+        success: function(response) {
+            try {
+                const data = typeof response === 'string' ? JSON.parse(response) : response;
+                if (data.success) {
+                    showAlert('success', 'Signet supprimé');
+                    loadBookmarks();
+                }
+            } catch (e) {
+                console.error('❌ Erreur:', e);
+            }
+        },
+        error: function() {
+            showAlert('error', 'Erreur lors de la suppression du signet');
+        }
+    });
+}
+
+function goToPage(page) {
+    pageNum = parseInt(page);
+    queueRenderPage(pageNum);
+    closeSidePanel();
+}
+
+function showAlert(type, message) {
+    const alert = document.createElement('div');
+    alert.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white z-50 ${
+        type === 'success' ? 'bg-green-500' : 
+        type === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+    }`;
+    alert.innerHTML = `<div class="flex items-center gap-2">
+        <i class="fas fa-${type === 'success' ? 'check' : type === 'warning' ? 'exclamation' : 'times'}-circle"></i>
+        <span class="text-sm">${message}</span>
+    </div>`;
+    
+    document.body.appendChild(alert);
+    setTimeout(() => alert.remove(), 3000);
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function setupTouchNavigation() {
+    if (!isMobile()) return;
+    
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchEndX = 0;
+    let touchEndY = 0;
+    let lastTap = 0;
+    
+    const touchArea = document.getElementById('touchArea');
+    
+    touchArea.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+        touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+    
+    touchArea.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        touchEndY = e.changedTouches[0].screenY;
+        
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        
+        lastTap = currentTime;
+        handleSwipe();
+    }, { passive: true });
+    
+    function handleSwipe() {
+        const xDiff = touchStartX - touchEndX;
+        const yDiff = touchStartY - touchEndY;
+        const threshold = 50;
+        
+        if (Math.abs(xDiff) > Math.abs(yDiff) && Math.abs(xDiff) > threshold) {
+            if (xDiff > 0) {
+                onNextPage();
+            } else {
+                onPrevPage();
+            }
+        }
+    }
+    
+    document.getElementById('touchLeft').addEventListener('click', onPrevPage);
+    document.getElementById('touchRight').addEventListener('click', onNextPage);
+}
+
+// CSS pour l'animation
+const audioStyle = document.createElement('style');
+audioStyle.textContent = `
+    .audio-loading-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+`;
+document.head.appendChild(audioStyle);
+
+// INITIALISATION PRINCIPALE
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Initialisation ULTRA-SIMPLE');
+    
+    const ratingModal = document.getElementById('ratingModal');
+    if (ratingModal) {
+        ratingModal.classList.add('hidden');
+        ratingModal.style.display = 'none';
+    }
+    
+    loadPDF();
+    setupTouchNavigation();
+    setupSimplePageDetection();
+    setupCleanupEvents();
+    
+    // Event listeners pour les contrôles
+    document.getElementById('prevBtn').addEventListener('click', onPrevPage);
+    document.getElementById('nextBtn').addEventListener('click', onNextPage);
+    
+    document.getElementById('pageInput').addEventListener('change', function() {
+        const page = parseInt(this.value);
+        if (page >= 1 && page <= pdfDoc.numPages) {
+            pageNum = page;
+            queueRenderPage(pageNum);
+        }
+    });
+    
+    document.getElementById('zoomInBtn').addEventListener('click', zoomIn);
+    document.getElementById('zoomOutBtn').addEventListener('click', zoomOut);
+    
+    document.getElementById('notesBtn').addEventListener('click', function() {
+        switchTab('notes');
+        openSidePanel();
+    });
+    
+    document.getElementById('bookmarkBtn').addEventListener('click', function() {
+        switchTab('bookmarks');
+        openSidePanel();
+    });
+    
+    document.getElementById('closePanelBtn').addEventListener('click', closeSidePanel);
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            switchTab(this.dataset.tab);
+        });
+    });
+    
+    document.getElementById('saveNoteBtn').addEventListener('click', saveNote);
+    document.getElementById('saveBookmarkBtn').addEventListener('click', saveBookmark);
+    
+    // Gestion modal de notation si applicable
+    <?php if (!$has_rated): ?>
+    document.getElementById('rateBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        showRatingModal();
+    });
+    document.getElementById('closeRatingModal').addEventListener('click', hideRatingModal);
+    document.getElementById('cancelRatingBtn').addEventListener('click', hideRatingModal);
+    document.getElementById('submitRatingBtn').addEventListener('click', submitRating);
+    
+    document.getElementById('ratingModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            hideRatingModal();
+        }
+    });
+    
+    document.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', function() {
+            selectedRating = parseInt(this.dataset.rating);
+            updateStarDisplay();
+        });
+        
+        star.addEventListener('mouseenter', function() {
+            const rating = parseInt(this.dataset.rating);
+            document.querySelectorAll('.star').forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
             });
         });
-    </script>
+    });
+    
+    document.getElementById('starRating').addEventListener('mouseleave', updateStarDisplay);
+    <?php endif; ?>
+    
+    loadNotes();
+    loadBookmarks();
+    
+    // CONNEXION AUDIO ULTRA-SIMPLE
+    const connectAudioWhenReady = () => {
+        if (pdfDoc) {
+            const audioBtn = document.getElementById('audioToggleBtn');
+            if (audioBtn) {
+                const newBtn = audioBtn.cloneNode(true);
+                audioBtn.parentNode.replaceChild(newBtn, audioBtn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleAudioClick();
+                });
+                
+                console.log('🔗 Bouton audio ULTRA-SIMPLE connecté');
+            }
+        } else {
+            setTimeout(connectAudioWhenReady, 500);
+        }
+    };
+    
+    connectAudioWhenReady();
+    
+    // Event listeners pour clavier
+    document.addEventListener('keydown', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        
+        switch(e.key) {
+            case 'ArrowLeft':
+            case 'PageUp':
+                onPrevPage();
+                break;
+            case 'ArrowRight':
+            case 'PageDown':
+            case ' ':
+                e.preventDefault();
+                onNextPage();
+                break;
+            case 'Home':
+                pageNum = 1;
+                queueRenderPage(pageNum);
+                break;
+            case 'End':
+                pageNum = pdfDoc.numPages;
+                queueRenderPage(pageNum);
+                break;
+            case 'Escape':
+                if (document.getElementById('sidePanel').classList.contains('open')) {
+                    closeSidePanel();
+                }
+                if (!document.getElementById('ratingModal').classList.contains('hidden')) {
+                    hideRatingModal();
+                }
+                break;
+        }
+    });
+    
+    window.addEventListener('resize', function() {
+        if (pdfDoc) {
+            queueRenderPage(pageNum);
+        }
+    });
+    
+    window.addEventListener('orientationchange', function() {
+        setTimeout(() => {
+            if (pdfDoc) {
+                queueRenderPage(pageNum);
+            }
+        }, 100);
+    });
+    
+    console.log('✅ Initialisation ULTRA-SIMPLE terminée');
+});
+
+
+
+
+
+
+</script>
+    <!-- Ajouter AVANT tes scripts jQuery et PDF.js -->
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.16.3/dist/ort.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.6.0/dist/transformers.min.js"></script>
+
 </body>
 </html>

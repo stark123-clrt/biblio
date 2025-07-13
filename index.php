@@ -330,9 +330,7 @@ include "includes/header.php";
     <section class="py-20 bg-gradient-to-br from-gray-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16 slide-up-enter">
-                <h2 class="text-4xl lg:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Livres en vedette
-                </h2>
+            
                 <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
                     Découvrez notre sélection de livres spirituels soigneusement choisis pour enrichir votre parcours de foi
                 </p>

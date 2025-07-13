@@ -389,7 +389,7 @@ if (isset($user['profile_picture']) && !empty($user['profile_picture'])) {
                     </a>
                     <a href="<?php echo $base_path; ?>testimonials.php" 
                        class="nav-link px-4 py-2 font-medium hover:text-blue-100 dark:hover:text-blue-200 relative transition-smooth <?php echo ($current_page == 'testimonials.php') ? 'text-white' : 'text-blue-100' ?>">
-                        Témoignages
+                        Avis
                     </a>
                     
                     <?php if(isset($_SESSION['user_id'])): ?>
@@ -537,7 +537,7 @@ if (isset($user['profile_picture']) && !empty($user['profile_picture'])) {
                     <li>
                         <a href="<?php echo $base_path; ?>testimonials.php" 
                            class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-smooth font-medium <?php echo ($current_page == 'testimonials.php') ? 'bg-white bg-opacity-10' : '' ?>">
-                            <i class="fas fa-comment-alt mr-3"></i> Témoignages
+                            <i class="fas fa-comment-alt mr-3"></i> Avis
                         </a>
                     </li>
                     

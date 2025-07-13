@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<body>
+<button onclick="test()">🎵 Test Élodie</button>
+<div id="status">Prêt...</div>
+
+<script>
+async function test() {
+    const status = document.getElementById('status');
+    
+    try {
+        // URL complète pour éviter les problèmes de chemin
+        const response = await fetch('http://localhost/biblio/api/kokoro_tts.php?action=synthesize', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                text: 'Parfait, Christian ! Si ton API Kokoro utilise un modèle open source que tu as téléchargé et fait tourner localement, alors oui, tu peux tout à fait lui envoyer le texte extrait du PDF, à condition de bien structurer la requête comme ton modèle l’attend.',
+                voice: 'ff_siwis'
+            })
+        });
+        
+        status.textContent = `Status: ${response.status}`;
+        
+        if (response.ok) {
+            const audioBlob = await response.blob();
+            const audio = new Audio(URL.createObjectURL(audioBlob));
+            await audio.play();
+            status.textContent = '🔊 Lecture OK !';
+        } else {
+            const error = await response.text();
+            status.textContent = `Erreur: ${error}`;
+        }
+        
+    } catch (error) {
+        status.textContent = `Erreur: ${error.message}`;
+    }
+}
+</script>
+</body>
+</html>
