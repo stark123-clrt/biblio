@@ -54,7 +54,7 @@ jobs:
 
     # Cache des dépendances Composer
     - name: Cache Composer dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ env.COMPOSER_CACHE_DIR }}
         key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -136,18 +136,18 @@ jobs:
         composer require --dev phpmd/phpmd || true
         vendor/bin/phpmd classes/ text cleancode,codesize,design,naming,unusedcode || echo "PHPMD analysis completed"
 
-    # Upload des rapports de couverture
+    # Upload des rapports de couverture - ✅ CORRIGÉ : v3 → v4
     - name: Upload coverage reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-report
         path: coverage/
         retention-days: 30
 
-    # Upload des logs en cas d'échec
+    # Upload des logs en cas d'échec - ✅ CORRIGÉ : v3 → v4
     - name: Upload logs on failure
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-logs
         path: |
@@ -219,9 +219,9 @@ jobs:
         echo "📦 Optimisation des assets..."
         # Vous pouvez ajouter ici vos commandes de build
 
-    # Upload des assets buildés
+    # Upload des assets buildés - ✅ CORRIGÉ : v3 → v4
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: build-assets
         path: |
@@ -247,9 +247,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # Télécharger les assets buildés
+    # Télécharger les assets buildés - ✅ CORRIGÉ : v3 → v4
     - name: Download build artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: build-assets
 
@@ -298,10 +298,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # ✅ CORRIGÉ : v3 → v4
     - name: Download build artifacts
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
-        name: build-assets
+        name: build-artifacts
 
     # Déploiement production avec validations supplémentaires
     - name: Deploy to production
