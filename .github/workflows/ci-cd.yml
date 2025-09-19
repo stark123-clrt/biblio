@@ -91,7 +91,7 @@ jobs:
         echo "APP_DEBUG=true" >> .env.testing
         echo "SHOW_ERRORS=true" >> .env.testing
 
-    # Attendre que MySQL soit prêt
+    # Attendre que MySQL soit prêt pour lancer
     - name: Wait for MySQL
       run: |
         until mysql -h 127.0.0.1 -P 3306 -u root -ppassword -e "SELECT 1"; do
