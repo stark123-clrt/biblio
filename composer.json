@@ -1,9 +1,9 @@
 {
     "name": "chris/biblio",
-    "description": "Système de gestion de bibliothèque numérique",
+    "description": "Système de gestion de bibliothèque numérique chrétienne avec fonctionnalités de catalogage et de gestion des utilisateurs",
     "type": "project",
     "license": "MIT",
-    "keywords": ["library", "digital-library", "php", "mysql", "book-management"],
+    "keywords": ["library", "digital-library", "php", "mysql", "book-management", "christian-library"],
     "homepage": "https://github.com/stark123-clrt/biblio",
     "authors": [
         {
@@ -35,6 +35,7 @@
     },
     "scripts": {
         "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html coverage/ --coverage-text",
         "test:unit": "phpunit tests/SimpleTest.php --testdox",
         "test:auth": "phpunit tests/AuthenticationTest.php --testdox", 
         "test:repo": "phpunit tests/RepositoryTest.php --testdox",
@@ -43,26 +44,51 @@
             "@test:auth", 
             "@test:repo"
         ],
+        "test:watch": "phpunit --testdox --colors=always",
         "cs": "phpcs --standard=PSR12 classes/",
         "cs:fix": "phpcbf --standard=PSR12 classes/",
+        "cs:report": "phpcs --standard=PSR12 --report=summary classes/",
         "analyse": "phpstan analyse classes/ --level=5",
-        "ci": [
-            "@test:all",
+        "analyse:baseline": "phpstan analyse classes/ --level=5 --generate-baseline",
+        "quality": [
             "@cs",
             "@analyse"
         ],
+        "ci": [
+            "@test:coverage",
+            "@cs",
+            "@analyse"
+        ],
+        "ci:fast": [
+            "@test:all",
+            "@cs:report"
+        ],
+        "clean": [
+            "rm -rf coverage/",
+            "rm -rf .phpunit.cache/"
+        ],
         "post-install-cmd": [
-            "echo 'Installation terminée !'"
+            "echo 'Installation terminée ! Utilisez composer test pour lancer les tests.'"
         ],
         "post-update-cmd": [
-            "echo 'Mise à jour terminée !'"
+            "echo 'Mise à jour terminée ! Pensez à vérifier les tests avec composer ci.'"
         ]
     },
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true,
-        "prefer-stable": true
+        "prefer-stable": true,
+        "platform": {
+            "php": "8.0"
+        },
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "support": {
+        "issues": "https://github.com/stark123-clrt/biblio/issues",
+        "source": "https://github.com/stark123-clrt/biblio"
+    }
 }

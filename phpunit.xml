@@ -4,12 +4,12 @@
          bootstrap="vendor/autoload.php"
          colors="true"
          testdox="true"
+         cacheDirectory=".phpunit.cache"
          failOnWarning="false"
          failOnRisky="false"
          beStrictAboutOutputDuringTests="false"
          beStrictAboutTestsThatDoNotTestAnything="false">
 
-    <!-- Définir où se trouvent les tests -->
     <testsuites>
         <testsuite name="Unit Tests">
             <file>tests/SimpleTest.php</file>
@@ -25,7 +25,6 @@
         </testsuite>
     </testsuites>
 
-    <!-- Configuration de la couverture de code -->
     <source>
         <include>
             <directory>classes</directory>
@@ -35,10 +34,10 @@
             <directory>tests</directory>
             <directory>temp</directory>
             <directory>storage</directory>
+            <directory>assets</directory>
         </exclude>
     </source>
 
-    <!-- Variables d'environnement pour les tests -->
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_DEBUG" value="true"/>
@@ -46,12 +45,6 @@
         <env name="DB_HOST" value="localhost"/>
         <env name="DB_USER" value="root"/>
         <env name="DB_PASS" value=""/>
+        <env name="PHPUNIT_TESTING" value="true"/>
     </php>
-
-    <!-- Logging et rapports -->
-    <logging>
-        <log type="coverage-html" target="coverage/html"/>
-        <!-- Commenté temporairement car pas de driver xdebug -->
-        <!-- <log type="coverage-text" target="php://stdout"/> -->
-    </logging>
 </phpunit>
