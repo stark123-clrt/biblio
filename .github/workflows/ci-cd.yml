@@ -170,51 +170,6 @@ jobs:
         find . -name "*.env*" -type f -exec ls -la {} \; || echo "Pas de fichiers .env trouvés"
 
   # =========================================
-  # 🚀 JOB 3: BUILD ET ASSETS
-  # =========================================
-  build:
-    name: Build Assets
-    runs-on: ubuntu-latest
-    needs: tests
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    # Configuration Node.js pour les assets frontend
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-
-    # Installation des dépendances Node.js
-    - name: Install Node dependencies
-      run: |
-        npm ci || npm install
-
-    # Build des assets (CSS, JS)
-    - name: Build frontend assets
-      run: |
-        # Si vous utilisez un bundler comme Webpack, Vite, etc.
-        npm run build || echo "No build script found"
-        
-        # Minification CSS/JS basique
-        echo "📦 Optimisation des assets..."
-        # Vous pouvez ajouter ici vos commandes de build
-
-    # Upload des assets buildés
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-assets
-        path: |
-          assets/dist/
-          public/css/
-          public/js/
-        retention-days: 30
-
-  # =========================================
   # 🌍 JOB 4: DÉPLOIEMENT STAGING
   # =========================================
   deploy-staging:
