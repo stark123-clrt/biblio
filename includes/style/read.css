@@ -1,0 +1,426 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height pour mobiles modernes */
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            background: #1a1a1a;
+            font-family: system-ui, -apple-system, sans-serif;
+            touch-action: manipulation;
+        }
+
+        /* CONTENEUR PRINCIPAL - UTILISE 100% DE L'ESPACE */
+        .reader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            background: #1a1a1a;
+        }
+
+        /* EN-TÊTE ULTRA-COMPACT */
+        .header-bar {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            color: white;
+            padding: 2px 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 24px;
+            min-height: 24px;
+            max-height: 24px;
+            flex-shrink: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .header-bar h1 {
+            font-size: 10px;
+            font-weight: 500;
+            margin: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 120px;
+            line-height: 1;
+        }
+
+        /* CONTRÔLES ULTRA-COMPACTS */
+        .control-bar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            padding: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 28px;
+            min-height: 28px;
+            max-height: 28px;
+            flex-shrink: 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            z-index: 90;
+        }
+
+        /* ZONE PDF - UTILISE TOUT L'ESPACE RESTANT */
+        .pdf-viewer-container {
+            flex: 1;
+            position: relative;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: #1a1a1a;
+            width: 100vw;
+            height: calc(100vh - 52px); /* Total - header - controls */
+            height: calc(100dvh - 52px);
+            padding: 0;
+            margin: 0;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #pdfCanvas {
+            background: white;
+            display: block;
+            margin: 0 auto;
+            max-width: 100vw;
+            height: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* BOUTONS OPTIMISÉS */
+        .btn {
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-weight: 500;
+            font-size: 8px;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 1px;
+            border: none;
+            min-height: 20px;
+            white-space: nowrap;
+            touch-action: manipulation;
+            line-height: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            box-shadow: 0 1px 2px rgba(59,130,246,0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+            box-shadow: 0 1px 2px rgba(107,114,128,0.3);
+        }
+
+        .btn span {
+            display: none; /* Masquer texte sur mobile */
+        }
+
+        .btn i {
+            font-size: 10px;
+        }
+
+        /* CONTRÔLES GROUPÉS */
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 1px;
+        }
+
+        .page-input {
+            width: 24px;
+            text-align: center;
+            border: none;
+            background: transparent;
+            font-size: 8px;
+            color: #374151;
+            font-weight: 500;
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .zoom-display {
+            font-size: 7px;
+            color: #6b7280;
+            min-width: 24px;
+            text-align: center;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        /* PANNEAU LATÉRAL */
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -100vw;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            transition: right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel.open {
+            right: 0;
+        }
+
+        /* LOADING SPINNER */
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(59,130,246,0.3);
+            border-radius: 50%;
+            border-top-color: #3b82f6;
+            animation: spin 0.8s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* MODAL MASQUÉ */
+        #ratingModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            z-index: 300;
+            padding: 12px;
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+
+        #ratingModal:not(.hidden) {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #ratingModal > div {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            max-width: calc(100vw - 24px);
+            width: 100%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 4px;
+            font-size: 18px;
+            justify-content: center;
+        }
+
+        .star {
+            cursor: pointer;
+            color: #d1d5db;
+            transition: color 0.15s ease;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #fbbf24;
+        }
+
+        /* ZONES TACTILES POUR NAVIGATION */
+        .touch-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            z-index: 5;
+            pointer-events: auto;
+        }
+
+        .touch-left, .touch-right {
+            flex: 0 0 20%;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .touch-center {
+            flex: 1;
+            pointer-events: none;
+        }
+
+        /* CLASSES UTILITAIRES */
+        .hidden {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+
+        /* DESKTOP - GARDE L'ANCIEN STYLE */
+        @media (min-width: 769px) {
+            html, body {
+                position: static;
+                height: auto;
+                overflow: auto;
+            }
+
+            .reader-container {
+                position: static;
+                height: 100vh;
+            }
+
+            .header-bar {
+                height: 40px;
+                min-height: 40px;
+                max-height: 40px;
+                padding: 8px 16px;
+            }
+
+            .header-bar h1 {
+                font-size: 16px;
+                max-width: none;
+            }
+
+            .control-bar {
+                height: 44px;
+                min-height: 44px;
+                max-height: 44px;
+                padding: 8px 16px;
+            }
+
+            .pdf-viewer-container {
+                height: calc(100vh - 84px);
+                padding: 16px;
+            }
+
+            .btn {
+                padding: 8px 12px;
+                font-size: 12px;
+                min-height: 32px;
+                gap: 4px;
+            }
+
+            .btn span {
+                display: inline;
+            }
+
+            .btn i {
+                font-size: 12px;
+            }
+
+            .touch-area {
+                display: none;
+            }
+
+            .side-panel {
+                width: 400px;
+                right: -400px;
+            }
+        }
+
+        /* PETITS ÉCRANS */
+        @media (max-width: 375px) {
+            .header-bar {
+                height: 20px;
+                min-height: 20px;
+                max-height: 20px;
+                padding: 1px 2px;
+            }
+
+            .header-bar h1 {
+                font-size: 8px;
+                max-width: 80px;
+            }
+
+            .control-bar {
+                height: 24px;
+                min-height: 24px;
+                max-height: 24px;
+                padding: 1px;
+            }
+
+            .pdf-viewer-container {
+                height: calc(100vh - 44px);
+                height: calc(100dvh - 44px);
+            }
+
+            .btn {
+                padding: 1px 2px;
+                font-size: 7px;
+                min-height: 16px;
+            }
+
+            .btn i {
+                font-size: 8px;
+            }
+
+            .page-input {
+                width: 20px;
+                font-size: 7px;
+            }
+
+            .zoom-display {
+                font-size: 6px;
+                min-width: 20px;
+            }
+        }
+
+
+        /* UNIQUEMENT pour mobile */
+        @media (max-width: 768px) {
+             #pdfCanvas {
+           transform: scaleX(1.2);
+            }
+        }
+
+        /* SUPPRESSION DU BOUNCE iOS */
+        body {
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .pdf-viewer-container {
+            overscroll-behavior: contain;
+        }
+
+        /* OPTIMISATIONS DE PERFORMANCE */
+        .pdf-viewer-container,
+        #pdfCanvas,
+        .side-panel {
+            will-change: transform;
+        }
+  

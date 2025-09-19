@@ -1,0 +1,68 @@
+# =================================================================
+# .gitignore - Fichiers à exclure du versioning
+# =================================================================
+
+# Fichiers d'environnement (SÉCURITE)
+.env
+.env.local
+.env.staging
+.env.production
+.env.testing
+
+# Dépendances
+vendor/
+node_modules/
+composer.lock
+
+# Fichiers de cache et temporaires
+temp/
+storage/logs/
+coverage/
+.phpunit.cache/
+
+# Fichiers utilisateur uploadés
+assets/uploads/profiles/*
+assets/uploads/books/*
+assets/uploads/covers/*
+!assets/uploads/profiles/.gitkeep
+!assets/uploads/books/.gitkeep
+!assets/uploads/covers/.gitkeep
+
+# Rapports et logs
+*.log
+phpunit.xml.bak
+.phpunit.result.cache
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE et éditeurs
+.vscode/
+.idea/
+*.sublime-*
+.project
+.settings/
+
+# Mode maintenance
+maintenance.mode
+
+# Sauvegardes
+backups/
+*.backup
+*.bak
+*.sql
+
+# Fichiers de développement
+todo.txt
+notes.md
+debug.php
+
+# Variables locales PHPStorm
+.phpstorm.meta.php
+
+# Fichiers de configuration locale
+config/local.php

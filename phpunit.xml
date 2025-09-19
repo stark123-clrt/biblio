@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         testdox="true"
+         failOnWarning="false"
+         failOnRisky="false"
+         beStrictAboutOutputDuringTests="false"
+         beStrictAboutTestsThatDoNotTestAnything="false">
+
+    <!-- Définir où se trouvent les tests -->
+    <testsuites>
+        <testsuite name="Unit Tests">
+            <file>tests/SimpleTest.php</file>
+        </testsuite>
+        <testsuite name="Authentication Tests">
+            <file>tests/AuthenticationTest.php</file>
+        </testsuite>
+        <testsuite name="Repository Tests">
+            <file>tests/RepositoryTest.php</file>
+        </testsuite>
+        <testsuite name="All Tests">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <!-- Configuration de la couverture de code -->
+    <source>
+        <include>
+            <directory>classes</directory>
+        </include>
+        <exclude>
+            <directory>vendor</directory>
+            <directory>tests</directory>
+            <directory>temp</directory>
+            <directory>storage</directory>
+        </exclude>
+    </source>
+
+    <!-- Variables d'environnement pour les tests -->
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_DEBUG" value="true"/>
+        <env name="DB_NAME" value="mydb_test"/>
+        <env name="DB_HOST" value="localhost"/>
+        <env name="DB_USER" value="root"/>
+        <env name="DB_PASS" value=""/>
+    </php>
+
+    <!-- Logging et rapports -->
+    <logging>
+        <log type="coverage-html" target="coverage/html"/>
+        <!-- Commenté temporairement car pas de driver xdebug -->
+        <!-- <log type="coverage-text" target="php://stdout"/> -->
+    </logging>
+</phpunit>

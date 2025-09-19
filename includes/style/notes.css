@@ -1,0 +1,205 @@
+:root {
+  --primary-light: #2563eb;
+  --primary-dark: #1d4ed8;
+  --bg-light: #f9fafb;
+  --bg-dark: #111827;
+  --card-light: #ffffff;
+  --card-dark: #1f2937;
+  --text-light: #374151;
+  --text-dark: #e5e7eb;
+  --border-light: #e5e7eb;
+  --border-dark: #374151;
+  --hover-light: #f3f4f6;
+  --hover-dark: #374151;
+  --success-light: #d1fae5;
+  --success-dark: #064e3b;
+  --success-text-light: #065f46;
+  --success-text-dark: #10b981;
+  --error-light: #fee2e2;
+  --error-dark: #7f1d1d;
+  --error-text-light: #b91c1c;
+  --error-text-dark: #ef4444;
+  --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-dark: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.18);
+  --shadow-hover-light: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-hover-dark: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Cards styles avec transitions */
+.dark .bg-white {
+  background-color: var(--card-dark) !important;
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+.bg-white {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Message de succès */
+.bg-green-100 {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .bg-green-100 {
+  background-color: var(--success-dark);
+  border-color: var(--success-text-dark);
+  color: var(--success-text-dark);
+}
+
+/* Message d'erreur */
+.bg-red-100 {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .bg-red-100 {
+  background-color: var(--error-dark);
+  border-color: var(--error-text-dark);
+  color: var(--error-text-dark);
+}
+
+/* Style des forms */
+input, select, textarea {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark input, .dark select, .dark textarea {
+  background-color: var(--bg-dark);
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+.dark input:focus, .dark select:focus, .dark textarea:focus {
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.3);
+}
+
+.dark input::placeholder {
+  color: #6b7280;
+}
+
+/* Style amélioré des notes */
+.note-card {
+  transition: transform 0.2s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  overflow: hidden; 
+}
+
+.note-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover-light);
+}
+
+.dark .note-card:hover {
+  box-shadow: var(--shadow-hover-dark);
+}
+
+/* Amélioration du modal */
+#editNoteModal {
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s ease;
+}
+
+.dark #editNoteModal .bg-white {
+  background-color: var(--card-dark);
+  color: var(--text-dark);
+}
+
+.dark #editNoteModal .text-gray-700 {
+  color: #d1d5db;
+}
+
+.dark #editNoteModal .text-gray-400:hover {
+  color: #9ca3af;
+}
+
+/* Améliorations pour les boutons */
+.btn {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.btn:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+/* Style pour no-notes message */
+.dark .text-gray-400 {
+  color: #6b7280;
+}
+
+.dark .text-gray-600 {
+  color: #9ca3af;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db;
+}
+
+/* Text colors for dark mode */
+.dark .text-blue-600 {
+  color: #60a5fa;
+}
+
+.dark .text-blue-800 {
+  color: #3b82f6;
+}
+
+.dark .text-indigo-600 {
+  color: #818cf8;
+}
+
+.dark .text-indigo-800 {
+  color: #6366f1;
+}
+
+.dark .text-red-600 {
+  color: #f87171;
+}
+
+.dark .text-red-800 {
+  color: #ef4444;
+}
+
+/* Modal animation */
+#modalContent {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Toast notification */
+.toast-notification {
+  transition: all 0.3s ease;
+}

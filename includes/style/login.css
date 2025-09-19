@@ -1,0 +1,247 @@
+
+        body {
+            background-image: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            position: relative;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+            transition: background-color 0.5s ease;
+        }
+        
+        .dark body::before {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        /* Animation d'entrée */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Carte principale */
+        .premium-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .dark .premium-card {
+            background: rgba(15, 23, 42, 0.9);
+        }
+        
+        /* En-tête */
+        .premium-header {
+            background: linear-gradient(135deg, #4a6fa5 0%, #3a5a8a 100%);
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .dark .premium-header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        }
+        
+        /* Champs de formulaire */
+        .premium-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: white;
+            color: #1a202c;
+        }
+        
+        .dark .premium-input {
+            background-color: #2d3748;
+            border-color: #4a5568;
+            color: white;
+        }
+        
+        .premium-input:focus {
+            border-color: #4a6fa5;
+            box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.3);
+            outline: none;
+        }
+        
+        .dark .premium-input:focus {
+            border-color: #63b3ed;
+            box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.3);
+        }
+        
+        /* Bouton */
+        .premium-btn {
+            background: linear-gradient(135deg, #4a6fa5 0%, #3a5a8a 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .premium-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 111, 165, 0.3);
+        }
+        
+        .dark .premium-btn {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+        }
+        
+        /* Messages d'alerte */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert-error {
+            background-color: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #e53e3e;
+        }
+        
+        .dark .alert-error {
+            background-color: #742a2a;
+            border-color: #742a2a;
+            color: #fed7d7;
+        }
+        
+        /* Icônes */
+        .input-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a0aec0;
+        }
+        
+        .dark .input-icon {
+            color: #718096;
+        }
+        
+        /* Liens */
+        .text-link {
+            color: #4a6fa5;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .dark .text-link {
+            color: #63b3ed;
+        }
+        
+        .text-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: currentColor;
+            transition: width 0.3s ease;
+        }
+        
+        .text-link:hover::after {
+            width: 100%;
+        }
+        
+        /* Espacement et mise en page */
+        .form-container {
+            padding: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .dark .form-label {
+            color: #a0aec0;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 1.5rem 0;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .checkbox-custom {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 4px;
+            margin-right: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        
+        .dark .checkbox-custom {
+            border-color: #4a5568;
+        }
+        
+        input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        input[type="checkbox"]:checked + .checkbox-custom {
+            background-color: #4a6fa5;
+            border-color: #4a6fa5;
+        }
+        
+        .dark input[type="checkbox"]:checked + .checkbox-custom {
+            background-color: #4299e1;
+            border-color: #4299e1;
+        }
+        
+        input[type="checkbox"]:checked + .checkbox-custom::after {
+            content: '';
+            display: block;
+            width: 0.5rem;
+            height: 0.25rem;
+            border: solid white;
+            border-width: 0 0 2px 2px;
+            transform: rotate(-45deg);
+            margin-bottom: 2px;
+        }

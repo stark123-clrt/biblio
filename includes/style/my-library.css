@@ -1,0 +1,103 @@
+
+/* Styles pour l'animation des livres */
+.slide-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUpFade 0.6s ease-out forwards;
+}
+
+@keyframes slideUpFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Glass effect pour les cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-card {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+/* Filtres actifs */
+.filter-btn.active {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    transform: scale(1.05);
+}
+
+/* Hover effect pour les livres */
+.library-book:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+/* Animation du bouton favori */
+.favorite-btn:active {
+    transform: scale(0.95);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .glass-card {
+        margin: 0 0.5rem;
+    }
+}
+
+
+/* Styles pour l'animation des livres */
+.slide-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUpFade 0.6s ease-out forwards;
+}
+
+@keyframes slideUpFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Glass effect pour les cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-card {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+/* Filtres actifs */
+.filter-btn.active {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.5);
+    transform: scale(1.05);
+}
+
+/* Hover effect pour les livres */
+.library-book:hover {
+    transform: translateY(-4px) scale(1.02);
+}
+
+/* Animation du bouton favori */
+.favorite-btn:active {
+    transform: scale(0.95);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .glass-card {
+        margin: 0 0.5rem;
+    }
+}

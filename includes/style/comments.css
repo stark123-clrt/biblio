@@ -1,0 +1,277 @@
+/* Styles pour le mode clair/sombre */
+:root {
+  --primary-light: #2563eb;
+  --primary-dark: #1d4ed8;
+  --bg-light: #f9fafb;
+  --bg-dark: #111827;
+  --card-light: #ffffff;
+  --card-dark: #1f2937;
+  --card-alt-light: #f9fafb;
+  --card-alt-dark: #374151;
+  --text-light: #374151;
+  --text-dark: #e5e7eb;
+  --border-light: #e5e7eb;
+  --border-dark: #374151;
+  --hover-light: #f3f4f6;
+  --hover-dark: #374151;
+  --success-light: #d1fae5;
+  --success-dark: #064e3b;
+  --success-text-light: #065f46;
+  --success-text-dark: #10b981;
+  --error-light: #fee2e2;
+  --error-dark: #7f1d1d;
+  --error-text-light: #b91c1c;
+  --error-text-dark: #ef4444;
+  --yellow-light: #fef3c7;
+  --yellow-dark: #78350f;
+  --yellow-text-light: #92400e;
+  --yellow-text-dark: #fbbf24;
+  --blue-light: #dbeafe;
+  --blue-dark: #1e3a8a;
+  --blue-text-light: #1d4ed8;
+  --blue-text-dark: #3b82f6;
+  --shadow-light: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-dark: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.18);
+  --shadow-hover-light: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-hover-dark: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+/* Transitions globales */
+body, .bg-white, .bg-gray-50, input, select, textarea, button, a {
+  transition: all 0.3s ease;
+}
+
+/* Adaptations du mode sombre */
+.dark .bg-white {
+  background-color: var(--card-dark);
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+.dark .bg-gray-50 {
+  background-color: var(--card-alt-dark);
+  color: var(--text-dark);
+  border-color: var(--border-dark);
+}
+
+/* Message de succès */
+.bg-green-100 {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .bg-green-100 {
+  background-color: var(--success-dark);
+  border-color: var(--success-text-dark);
+  color: var(--success-text-dark);
+}
+
+/* Message d'erreur */
+.bg-red-100 {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .bg-red-100 {
+  background-color: var(--error-dark);
+  border-color: var(--error-text-dark);
+  color: var(--error-text-dark);
+}
+
+/* Badges de statut */
+.dark .bg-green-100.text-green-800 {
+  background-color: var(--success-dark);
+  color: var(--success-text-dark);
+}
+
+.dark .bg-yellow-100.text-yellow-800 {
+  background-color: var(--yellow-dark);
+  color: var(--yellow-text-dark);
+}
+
+.dark .bg-blue-100.text-blue-800 {
+  background-color: var(--blue-dark);
+  color: var(--blue-text-dark);
+}
+
+/* Style amélioré des commentaires */
+.comment-card {
+  transition: transform 0.2s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  overflow: hidden;
+}
+
+.comment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover-light);
+}
+
+.dark .comment-card:hover {
+  box-shadow: var(--shadow-hover-dark);
+}
+
+/* Boutons d'action */
+.action-button {
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.action-button:after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.action-button:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+/* Modal animation */
+#modalContent {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Toast notification */
+.toast-notification {
+  transition: all 0.3s ease;
+}
+
+/* Text colors for dark mode */
+.dark .text-gray-400 {
+  color: #6b7280;
+}
+
+.dark .text-gray-600 {
+  color: #9ca3af;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db;
+}
+
+.dark .text-blue-600 {
+  color: #60a5fa;
+}
+
+.dark .text-blue-800 {
+  color: #3b82f6;
+}
+
+.dark .text-indigo-600 {
+  color: #818cf8;
+}
+
+.dark .text-indigo-800 {
+  color: #6366f1;
+}
+
+.dark .text-red-600 {
+  color: #f87171;
+}
+
+.dark .text-red-800 {
+  color: #ef4444;
+}
+
+/* Style pour les étoiles */
+.rating-star {
+  transition: color 0.2s ease;
+}
+
+.dark .text-gray-300 {
+  color: #4b5563;
+}
+
+.dark .text-yellow-400 {
+  color: #fbbf24;
+}
+
+
+.slide-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUpFade 0.6s ease-out forwards;
+}
+
+@keyframes slideUpFade {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Glass effect pour les cards */
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-card {
+    background: rgba(17, 24, 39, 0.7);
+    border: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+/* Animation pour l'expansion des commentaires */
+.comment-full {
+    animation: expandComment 0.3s ease-out;
+}
+
+@keyframes expandComment {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        max-height: 1000px;
+    }
+}
+
+/* Animation du modal */
+#editCommentModal.show #modalContent {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Étoiles interactives */
+.rating-star {
+    transition: all 0.2s ease;
+}
+
+.rating-star:hover {
+    transform: scale(1.1);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .glass-card {
+        margin: 0 0.5rem;
+    }
+    
+    .lg\\:flex {
+        display: block;
+    }
+    
+}

@@ -42,6 +42,7 @@ try {
             $note_id = $existing['id'];
         }
     }
+    
 
     if ($note_id) {
         // Mise à jour d'une note existante
