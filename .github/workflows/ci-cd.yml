@@ -1,5 +1,5 @@
 # .github/workflows/ci-cd.yml
-# Pipeline CI/CD pour Bibliothèque Chrétienne (PHP uniquement)
+# Pipeline CI/CD pour Bibliothèque Chrétienne (tous jobs actifs)
 
 name: CI/CD Pipeline - Bibliothèque
 
@@ -164,13 +164,13 @@ jobs:
           retention-days: 30
 
   # =========================================
-  # 🌍 JOB 4: DÉPLOIEMENT STAGING
+  # 🌍 JOB 4: DÉPLOIEMENT STAGING - ✅ TOUJOURS ACTIF
   # =========================================
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [tests, security, build]
-    if: github.ref == 'refs/heads/develop'
+    # ✅ SUPPRIMÉ: if: github.ref == 'refs/heads/develop'
 
     environment:
       name: staging
@@ -188,15 +188,22 @@ jobs:
       - name: Deploy to staging server
         run: |
           echo "🚀 Déploiement vers STAGING..."
+          echo "📍 Branche: ${{ github.ref_name }}"
+          echo "📍 Commit: ${{ github.sha }}"
+          
           mkdir -p ~/.ssh
           echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          
           echo "📁 Synchronisation des fichiers..."
           # rsync -avz --delete ./ user@staging-server:/path/to/app/
+          
           echo "🔄 Mise à jour des dépendances..."
           # ssh user@staging-server "cd /path/to/app && composer install --no-dev --optimize-autoloader"
+          
           echo "🗃️ Migration base de données..."
           # ssh user@staging-server "cd /path/to/app && php migrate.php"
+          
           echo "✅ Déploiement STAGING terminé !"
 
       - name: Health check staging
@@ -205,13 +212,13 @@ jobs:
           # curl -f https://staging.bibliotheque-chretienne.com/health || exit 1
 
   # =========================================
-  # 🌟 JOB 5: DÉPLOIEMENT PRODUCTION
+  # 🌟 JOB 5: DÉPLOIEMENT PRODUCTION - ✅ TOUJOURS ACTIF
   # =========================================
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [tests, security, build]
-    if: github.event_name == 'release'
+    # ✅ SUPPRIMÉ: if: github.event_name == 'release'
 
     environment:
       name: production
@@ -229,17 +236,26 @@ jobs:
       - name: Deploy to production
         run: |
           echo "🌟 DÉPLOIEMENT PRODUCTION..."
+          echo "📍 Branche: ${{ github.ref_name }}"
+          echo "📍 Event: ${{ github.event_name }}"
+          echo "📍 Commit: ${{ github.sha }}"
+          
           echo "💾 Sauvegarde de la base de données..."
           # ssh user@prod-server "mysqldump bibliotheque > backup-$(date +%Y%m%d_%H%M%S).sql"
+          
           echo "🔧 Activation du mode maintenance..."
           # ssh user@prod-server "touch /path/to/app/maintenance.mode"
+          
           echo "📁 Déploiement des fichiers..."
           # rsync -avz --delete ./ user@prod-server:/path/to/app/
+          
           echo "🔄 Mise à jour application..."
           # ssh user@prod-server "cd /path/to/app && composer install --no-dev --optimize-autoloader"
           # ssh user@prod-server "cd /path/to/app && php migrate.php"
+          
           echo "✅ Désactivation du mode maintenance..."
           # ssh user@prod-server "rm -f /path/to/app/maintenance.mode"
+          
           echo "🎉 DÉPLOIEMENT PRODUCTION TERMINÉ !"
 
       - name: Post-deployment tests
