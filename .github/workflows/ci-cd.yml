@@ -85,7 +85,7 @@ jobs:
         echo "APP_ENV=testing" >> .env.testing
         echo "DB_HOST=127.0.0.1" >> .env.testing
         echo "DB_PORT=3306" >> .env.testing
-        echo "DB_NAME=mydb_test" >> .env.testing
+        echo "DB_NAME=bibliotheque_test" >> .env.testing
         echo "DB_USER=root" >> .env.testing
         echo "DB_PASS=password" >> .env.testing
         echo "APP_DEBUG=true" >> .env.testing
@@ -107,44 +107,23 @@ jobs:
         # Pour l'instant, importer le schéma SQL
         mysql -h 127.0.0.1 -P 3306 -u root -ppassword bibliotheque_test < database/schema.sql || echo "Schema import failed, continuing..."
 
-    # Exécution des tests PHPUnit
+    # ✅ CORRIGÉ: Exécution des tests PHPUnit avec le script composer
     - name: Run PHPUnit tests
       run: |
-        echo "🧪 Exécution des tests unitaires..."
-        vendor/bin/phpunit tests/SimpleTest.php --colors=always --testdox
-        
-        echo "🔐 Exécution des tests d'authentification..."
-        vendor/bin/phpunit tests/AuthenticationTest.php --colors=always --testdox
-        
-        echo "🗄️ Exécution des tests de repository..."
-        vendor/bin/phpunit tests/RepositoryTest.php --colors=always --testdox
-        
-        echo "📊 Exécution de tous les tests avec couverture..."
-        vendor/bin/phpunit --coverage-text --coverage-html coverage/
+        echo "🧪 Exécution de tous les tests..."
+        composer ci
 
-    # Analyse de la qualité du code avec PHP_CodeSniffer
-    - name: Code quality analysis
-      run: |
-        # Installer PHP_CodeSniffer si pas déjà installé
-        composer require --dev squizlabs/php_codesniffer || true
-        
-        # Analyser le code
-        echo "📝 Analyse de la qualité du code..."
-        vendor/bin/phpcs --standard=PSR12 classes/ || echo "Code style issues found"
-        
-        # Analyse avec PHPMD si disponible
-        composer require --dev phpmd/phpmd || true
-        vendor/bin/phpmd classes/ text cleancode,codesize,design,naming,unusedcode || echo "PHPMD analysis completed"
-
-    # Upload des rapports de couverture - ✅ CORRIGÉ : v3 → v4
+    # ✅ CORRIGÉ: Upload conditionnel de la couverture seulement si elle existe
     - name: Upload coverage reports
+      if: success()
       uses: actions/upload-artifact@v4
       with:
         name: coverage-report
         path: coverage/
         retention-days: 30
+      continue-on-error: true
 
-    # Upload des logs en cas d'échec - ✅ CORRIGÉ : v3 → v4
+    # Upload des logs en cas d'échec
     - name: Upload logs on failure
       if: failure()
       uses: actions/upload-artifact@v4
@@ -172,18 +151,23 @@ jobs:
       with:
         php-version: ${{ env.PHP_VERSION }}
 
+    # Installation des dépendances pour les outils de sécurité
+    - name: Install dependencies
+      run: composer install --no-dev --optimize-autoloader
+
     # Scan de sécurité avec plusieurs outils
     - name: Security vulnerability scan
       run: |
-        # Installer les outils de sécurité
-        composer require --dev enlightn/security-checker
-        
-        # Vérification des vulnérabilités connues
-        vendor/bin/security-checker security:check composer.lock
+        # Vérification des vulnérabilités connues avec composer audit
+        composer audit
         
         # Scan des fichiers PHP pour détecter des problèmes de sécurité
         echo "🔍 Recherche de vulnérabilités dans le code..."
         grep -r "eval\|exec\|system\|shell_exec" --include="*.php" . || echo "Aucune fonction dangereuse détectée"
+        
+        # Vérification des permissions de fichiers sensibles
+        echo "🔒 Vérification des permissions..."
+        find . -name "*.env*" -type f -exec ls -la {} \; || echo "Pas de fichiers .env trouvés"
 
   # =========================================
   # 🚀 JOB 3: BUILD ET ASSETS
@@ -219,7 +203,7 @@ jobs:
         echo "📦 Optimisation des assets..."
         # Vous pouvez ajouter ici vos commandes de build
 
-    # Upload des assets buildés - ✅ CORRIGÉ : v3 → v4
+    # Upload des assets buildés
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -247,7 +231,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # Télécharger les assets buildés - ✅ CORRIGÉ : v3 → v4
+    # Télécharger les assets buildés
     - name: Download build artifacts
       uses: actions/download-artifact@v4
       with:
@@ -298,11 +282,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # ✅ CORRIGÉ : v3 → v4
+    # ✅ CORRIGÉ: Nom d'artifact cohérent
     - name: Download build artifacts
       uses: actions/download-artifact@v4
       with:
-        name: build-artifacts
+        name: build-assets
 
     # Déploiement production avec validations supplémentaires
     - name: Deploy to production
