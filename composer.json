@@ -45,9 +45,9 @@
             "@test:repo"
         ],
         "test:watch": "phpunit --testdox --colors=always",
-        "cs": "phpcs --standard=PSR12 classes/",
-        "cs:fix": "phpcbf --standard=PSR12 classes/",
-        "cs:report": "phpcs --standard=PSR12 --report=summary classes/",
+        "cs": "phpcs --standard=phpcs.xml",
+        "cs:fix": "phpcbf --standard=phpcs.xml", 
+        "cs:report": "phpcs --standard=phpcs.xml --report=summary",
         "analyse": "phpstan analyse classes/ --level=5",
         "analyse:baseline": "phpstan analyse classes/ --level=5 --generate-baseline",
         "quality": [

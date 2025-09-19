@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<ruleset name="Bibliothèque Custom">
+    <description>Règles de style de code pour le projet Bibliothèque</description>
+    
+    <!-- Utiliser PSR-12 comme base -->
+    <rule ref="PSR12">
+        <!-- Ignorer les erreurs de namespace pour le moment -->
+        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
+        <exclude name="PSR1.Classes.ClassDeclaration.MultipleClasses"/>
+        
+        <!-- Assouplir la limite de longueur des lignes -->
+        <exclude name="Generic.Files.LineLength.TooLong"/>
+    </rule>
+    
+    <!-- Définir une limite de ligne plus permissive -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="150"/>
+            <property name="absoluteLineLimit" value="200"/>
+        </properties>
+    </rule>
+    
+    <!-- Fichiers à analyser -->
+    <file>classes</file>
+    
+    <!-- Exclusions -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/temp/*</exclude-pattern>
+    <exclude-pattern>*/storage/*</exclude-pattern>
+</ruleset>
