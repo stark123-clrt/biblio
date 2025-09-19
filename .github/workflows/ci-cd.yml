@@ -1,22 +1,18 @@
 # .github/workflows/ci-cd.yml
-# Pipeline CI/CD pour Bibliothèque Chrétienne
-# Automatise les tests, la qualité du code et le déploiement
+# Pipeline CI/CD pour Bibliothèque Chrétienne (PHP uniquement)
 
 name: CI/CD Pipeline - Bibliothèque
 
-# Déclencheurs du pipeline
 on:
   push:
     branches: [ master, develop ]
   pull_request:
-    branches: [ master]
+    branches: [ master ]
   release:
     types: [ published ]
 
-# Variables d'environnement globales
 env:
   PHP_VERSION: '8.2'
-  NODE_VERSION: '18'
   COMPOSER_CACHE_DIR: ~/.composer/cache
 
 jobs:
@@ -27,7 +23,6 @@ jobs:
     name: Tests & Code Quality
     runs-on: ubuntu-latest
     
-    # Services externes (base de données de test)
     services:
       mysql:
         image: mysql:8.0
@@ -39,100 +34,84 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-    # Récupération du code source
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # Configuration PHP avec extensions nécessaires
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ env.PHP_VERSION }}
-        extensions: pdo, pdo_mysql, mbstring, xml, bcmath, gd
-        coverage: xdebug
-        tools: composer
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo, pdo_mysql, mbstring, xml, bcmath, gd
+          coverage: xdebug
+          tools: composer
 
-    # Cache des dépendances Composer
-    - name: Cache Composer dependencies
-      uses: actions/cache@v4
-      with:
-        path: ${{ env.COMPOSER_CACHE_DIR }}
-        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-        restore-keys: ${{ runner.os }}-composer-
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.COMPOSER_CACHE_DIR }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
 
-    # Installation des dépendances PHP
-    - name: Install PHP dependencies
-      run: |
-        composer install --no-progress --no-suggest --no-interaction --prefer-dist --optimize-autoloader
+      - name: Install PHP dependencies
+        run: |
+          composer install --no-progress --no-suggest --no-interaction --prefer-dist --optimize-autoloader
 
-    # Validation de la configuration
-    - name: Validate composer.json
-      run: composer validate --strict
+      - name: Validate composer.json
+        run: composer validate --strict
 
-    # Vérification de la sécurité des dépendances
-    - name: Security check
-      run: |
-        composer audit
-        # Installer et utiliser security-checker si disponible
-        wget -O security-checker https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_linux_amd64
-        chmod +x security-checker
-        ./security-checker --path=composer.lock
+      - name: Security check
+        run: |
+          composer audit
+          wget -O security-checker https://github.com/fabpot/local-php-security-checker/releases/download/v2.0.6/local-php-security-checker_2.0.6_linux_amd64
+          chmod +x security-checker
+          ./security-checker --path=composer.lock
 
-    # Configuration de l'environnement de test
-    - name: Setup test environment
-      run: |
-        cp .env.example .env.testing
-        echo "APP_ENV=testing" >> .env.testing
-        echo "DB_HOST=127.0.0.1" >> .env.testing
-        echo "DB_PORT=3306" >> .env.testing
-        echo "DB_NAME=bibliotheque_test" >> .env.testing
-        echo "DB_USER=root" >> .env.testing
-        echo "DB_PASS=password" >> .env.testing
-        echo "APP_DEBUG=true" >> .env.testing
-        echo "SHOW_ERRORS=true" >> .env.testing
+      - name: Setup test environment
+        run: |
+          cp .env.example .env.testing
+          echo "APP_ENV=testing" >> .env.testing
+          echo "DB_HOST=127.0.0.1" >> .env.testing
+          echo "DB_PORT=3306" >> .env.testing
+          echo "DB_NAME=bibliotheque_test" >> .env.testing
+          echo "DB_USER=root" >> .env.testing
+          echo "DB_PASS=password" >> .env.testing
+          echo "APP_DEBUG=true" >> .env.testing
+          echo "SHOW_ERRORS=true" >> .env.testing
 
-    # Attendre que MySQL soit prêt
-    - name: Wait for MySQL
-      run: |
-        until mysql -h 127.0.0.1 -P 3306 -u root -ppassword -e "SELECT 1"; do
-          echo "Waiting for MySQL..."
-          sleep 2
-        done
+      - name: Wait for MySQL
+        run: |
+          until mysql -h 127.0.0.1 -P 3306 -u root -ppassword -e "SELECT 1"; do
+            echo "Waiting for MySQL..."
+            sleep 2
+          done
 
-    # Migration de la base de données de test
-    - name: Run database migrations
-      run: |
-        # Si vous avez des migrations, les exécuter ici
-        # php artisan migrate --env=testing --force
-        # Pour l'instant, importer le schéma SQL
-        mysql -h 127.0.0.1 -P 3306 -u root -ppassword bibliotheque_test < database/schema.sql || echo "Schema import failed, continuing..."
+      - name: Run database migrations
+        run: |
+          mysql -h 127.0.0.1 -P 3306 -u root -ppassword bibliotheque_test < database/schema.sql || echo "Schema import failed, continuing..."
 
-    # ✅ CORRIGÉ: Exécution des tests PHPUnit avec le script composer
-    - name: Run PHPUnit tests
-      run: |
-        echo "🧪 Exécution de tous les tests..."
-        composer ci
+      - name: Run PHPUnit tests
+        run: |
+          echo "🧪 Exécution de tous les tests..."
+          composer ci
 
-    # ✅ CORRIGÉ: Upload conditionnel de la couverture seulement si elle existe
-    - name: Upload coverage reports
-      if: success()
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverage/
-        retention-days: 30
-      continue-on-error: true
+      - name: Upload coverage reports
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+        continue-on-error: true
 
-    # Upload des logs en cas d'échec
-    - name: Upload logs on failure
-      if: failure()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-logs
-        path: |
-          storage/logs/
-          tests/reports/
-        retention-days: 7
+      - name: Upload logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs
+          path: |
+            storage/logs/
+            tests/reports/
+          retention-days: 7
 
   # =========================================
   # 🔒 JOB 2: SÉCURITÉ ET VULNÉRABILITÉS
@@ -143,76 +122,46 @@ jobs:
     needs: tests
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ env.PHP_VERSION }}
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
 
-    # Installation des dépendances pour les outils de sécurité
-    - name: Install dependencies
-      run: composer install --no-dev --optimize-autoloader
+      - name: Install dependencies
+        run: composer install --no-dev --optimize-autoloader
 
-    # Scan de sécurité avec plusieurs outils
-    - name: Security vulnerability scan
-      run: |
-        # Vérification des vulnérabilités connues avec composer audit
-        composer audit
-        
-        # Scan des fichiers PHP pour détecter des problèmes de sécurité
-        echo "🔍 Recherche de vulnérabilités dans le code..."
-        grep -r "eval\|exec\|system\|shell_exec" --include="*.php" . || echo "Aucune fonction dangereuse détectée"
-        
-        # Vérification des permissions de fichiers sensibles
-        echo "🔒 Vérification des permissions..."
-        find . -name "*.env*" -type f -exec ls -la {} \; || echo "Pas de fichiers .env trouvés"
+      - name: Security vulnerability scan
+        run: |
+          composer audit
+          echo "🔍 Recherche de vulnérabilités dans le code..."
+          grep -r "eval\|exec\|system\|shell_exec" --include="*.php" . || echo "Aucune fonction dangereuse détectée"
+          echo "🔒 Vérification des permissions..."
+          find . -name "*.env*" -type f -exec ls -la {} \; || echo "Pas de fichiers .env trouvés"
 
   # =========================================
-  # 🚀 JOB 3: BUILD ET ASSETS
+  # 🚀 JOB 3: BUILD PHP
   # =========================================
   build:
-    name: Build Assets
+    name: Build PHP Artifacts
     runs-on: ubuntu-latest
     needs: tests
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # Configuration Node.js pour les assets frontend
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'npm'
-
-    # Installation des dépendances Node.js
-    - name: Install Node dependencies
-      run: |
-        npm ci || npm install
-
-    # Build des assets (CSS, JS)
-    - name: Build frontend assets
-      run: |
-        # Si vous utilisez un bundler comme Webpack, Vite, etc.
-        npm run build || echo "No build script found"
-        
-        # Minification CSS/JS basique
-        echo "📦 Optimisation des assets..."
-        # Vous pouvez ajouter ici vos commandes de build
-
-    # Upload des assets buildés
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-assets
-        path: |
-          assets/dist/
-          public/css/
-          public/js/
-        retention-days: 30
+      - name: Upload PHP artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-artifacts
+          path: |
+            classes/
+            vendor/
+            storage/
+          retention-days: 30
 
   # =========================================
   # 🌍 JOB 4: DÉPLOIEMENT STAGING
@@ -222,48 +171,38 @@ jobs:
     runs-on: ubuntu-latest
     needs: [tests, security, build]
     if: github.ref == 'refs/heads/develop'
-    
+
     environment:
       name: staging
       url: https://staging.bibliotheque-chretienne.com
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # Télécharger les assets buildés
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-assets
+      - name: Download PHP artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: php-artifacts
 
-    # Déploiement vers l'environnement de staging
-    - name: Deploy to staging server
-      run: |
-        echo "🚀 Déploiement vers STAGING..."
-        
-        # Configuration SSH (utiliser les secrets GitHub)
-        mkdir -p ~/.ssh
-        echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        
-        # Commandes de déploiement (adapter selon votre serveur)
-        echo "📁 Synchronisation des fichiers..."
-        # rsync -avz --delete ./ user@staging-server:/path/to/app/
-        
-        echo "🔄 Mise à jour des dépendances..."
-        # ssh user@staging-server "cd /path/to/app && composer install --no-dev --optimize-autoloader"
-        
-        echo "🗃️ Migration base de données..."
-        # ssh user@staging-server "cd /path/to/app && php migrate.php"
-        
-        echo "✅ Déploiement STAGING terminé !"
+      - name: Deploy to staging server
+        run: |
+          echo "🚀 Déploiement vers STAGING..."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.STAGING_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          echo "📁 Synchronisation des fichiers..."
+          # rsync -avz --delete ./ user@staging-server:/path/to/app/
+          echo "🔄 Mise à jour des dépendances..."
+          # ssh user@staging-server "cd /path/to/app && composer install --no-dev --optimize-autoloader"
+          echo "🗃️ Migration base de données..."
+          # ssh user@staging-server "cd /path/to/app && php migrate.php"
+          echo "✅ Déploiement STAGING terminé !"
 
-    # Test de santé du déploiement
-    - name: Health check staging
-      run: |
-        echo "🏥 Vérification de santé..."
-        # curl -f https://staging.bibliotheque-chretienne.com/health || exit 1
+      - name: Health check staging
+        run: |
+          echo "🏥 Vérification de santé..."
+          # curl -f https://staging.bibliotheque-chretienne.com/health || exit 1
 
   # =========================================
   # 🌟 JOB 5: DÉPLOIEMENT PRODUCTION
@@ -273,61 +212,46 @@ jobs:
     runs-on: ubuntu-latest
     needs: [tests, security, build]
     if: github.event_name == 'release'
-    
+
     environment:
       name: production
       url: https://bibliotheque-chretienne.com
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # ✅ CORRIGÉ: Nom d'artifact cohérent
-    - name: Download build artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: build-assets
+      - name: Download PHP artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: php-artifacts
 
-    # Déploiement production avec validations supplémentaires
-    - name: Deploy to production
-      run: |
-        echo "🌟 DÉPLOIEMENT PRODUCTION..."
-        
-        # Sauvegarde avant déploiement
-        echo "💾 Sauvegarde de la base de données..."
-        # ssh user@prod-server "mysqldump bibliotheque > backup-$(date +%Y%m%d_%H%M%S).sql"
-        
-        # Mode maintenance
-        echo "🔧 Activation du mode maintenance..."
-        # ssh user@prod-server "touch /path/to/app/maintenance.mode"
-        
-        # Déploiement
-        echo "📁 Déploiement des fichiers..."
-        # rsync -avz --delete ./ user@prod-server:/path/to/app/
-        
-        # Mise à jour
-        echo "🔄 Mise à jour application..."
-        # ssh user@prod-server "cd /path/to/app && composer install --no-dev --optimize-autoloader"
-        # ssh user@prod-server "cd /path/to/app && php migrate.php"
-        
-        # Désactivation mode maintenance
-        echo "✅ Désactivation du mode maintenance..."
-        # ssh user@prod-server "rm -f /path/to/app/maintenance.mode"
-        
-        echo "🎉 DÉPLOIEMENT PRODUCTION TERMINÉ !"
+      - name: Deploy to production
+        run: |
+          echo "🌟 DÉPLOIEMENT PRODUCTION..."
+          echo "💾 Sauvegarde de la base de données..."
+          # ssh user@prod-server "mysqldump bibliotheque > backup-$(date +%Y%m%d_%H%M%S).sql"
+          echo "🔧 Activation du mode maintenance..."
+          # ssh user@prod-server "touch /path/to/app/maintenance.mode"
+          echo "📁 Déploiement des fichiers..."
+          # rsync -avz --delete ./ user@prod-server:/path/to/app/
+          echo "🔄 Mise à jour application..."
+          # ssh user@prod-server "cd /path/to/app && composer install --no-dev --optimize-autoloader"
+          # ssh user@prod-server "cd /path/to/app && php migrate.php"
+          echo "✅ Désactivation du mode maintenance..."
+          # ssh user@prod-server "rm -f /path/to/app/maintenance.mode"
+          echo "🎉 DÉPLOIEMENT PRODUCTION TERMINÉ !"
 
-    # Tests post-déploiement
-    - name: Post-deployment tests
-      run: |
-        echo "🧪 Tests post-déploiement..."
-        # curl -f https://bibliotheque-chretienne.com/health
-        # curl -f https://bibliotheque-chretienne.com/api/status
+      - name: Post-deployment tests
+        run: |
+          echo "🧪 Tests post-déploiement..."
+          # curl -f https://bibliotheque-chretienne.com/health
+          # curl -f https://bibliotheque-chretienne.com/api/status
 
-    # Notification en cas de succès
-    - name: Notify deployment success
-      run: |
-        echo "📧 Notification de succès..."
-        # Envoyer notification Slack, email, etc.
+      - name: Notify deployment success
+        run: |
+          echo "📧 Notification de succès..."
+          # Envoyer notification Slack, email, etc.
 
   # =========================================
   # 📊 JOB 6: MÉTRIQUES ET MONITORING
@@ -339,15 +263,13 @@ jobs:
     if: always()
 
     steps:
-    - name: Collect deployment metrics
-      run: |
-        echo "📊 Collecte des métriques..."
-        echo "Build ID: ${{ github.run_id }}"
-        echo "Commit: ${{ github.sha }}"
-        echo "Branch: ${{ github.ref }}"
-        echo "Event: ${{ github.event_name }}"
-        
-        # Envoyer métriques à votre système de monitoring
-        # curl -X POST "https://monitoring.example.com/metrics" \
-        #   -H "Content-Type: application/json" \
-        #   -d '{"deployment_id": "${{ github.run_id }}", "status": "success"}'
+      - name: Collect deployment metrics
+        run: |
+          echo "📊 Collecte des métriques..."
+          echo "Build ID: ${{ github.run_id }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Event: ${{ github.event_name }}"
+          # curl -X POST "https://monitoring.example.com/metrics" \
+          #   -H "Content-Type: application/json" \
+          #   -d '{"deployment_id": "${{ github.run_id }}", "status": "success"}'
