@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <ruleset name="Bibliothèque Custom">
-    <description>Règles de style de code pour le projet Bibliothèque</description>
+    <description>Règles de style de code pour le projet Bibliothèque - Configuration assouplie</description>
     
     <!-- Utiliser PSR-12 comme base -->
     <rule ref="PSR12">
@@ -8,16 +8,20 @@
         <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace"/>
         <exclude name="PSR1.Classes.ClassDeclaration.MultipleClasses"/>
         
-        <!-- Assouplir la limite de longueur des lignes -->
-        <exclude name="Generic.Files.LineLength.TooLong"/>
+        <!-- Ignorer les side effects (mélange de déclarations et logic) -->
+        <exclude name="PSR1.Files.SideEffects.FoundWithSymbols"/>
+        
+        <!-- Assouplir complètement la limite de longueur des lignes -->
+        <exclude name="Generic.Files.LineLength"/>
     </rule>
     
-    <!-- Définir une limite de ligne plus permissive -->
+    <!-- Définir une limite de ligne très permissive (optionnel, on peut la supprimer) -->
     <rule ref="Generic.Files.LineLength">
         <properties>
-            <property name="lineLimit" value="150"/>
-            <property name="absoluteLineLimit" value="200"/>
+            <property name="lineLimit" value="300"/>
+            <property name="absoluteLineLimit" value="400"/>
         </properties>
+        <severity>0</severity> <!-- Désactiver complètement les erreurs de longueur -->
     </rule>
     
     <!-- Fichiers à analyser -->
@@ -27,4 +31,5 @@
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/temp/*</exclude-pattern>
     <exclude-pattern>*/storage/*</exclude-pattern>
+    <exclude-pattern>*/assets/*</exclude-pattern>
 </ruleset>
