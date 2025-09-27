@@ -52,11 +52,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
             $stmt->bindParam(':book_id', $book_id, PDO::PARAM_INT);
             $stmt->execute();
             
-            // Supprimer les relations livre-tags
-            $stmt = $conn->prepare("DELETE FROM book_tags WHERE book_id = :book_id");
-            $stmt->bindParam(':book_id', $book_id, PDO::PARAM_INT);
-            $stmt->execute();
-            
+           
+          
             // Supprimer les commentaires associés
             $stmt = $conn->prepare("DELETE FROM comments WHERE book_id = :book_id");
             $stmt->bindParam(':book_id', $book_id, PDO::PARAM_INT);
