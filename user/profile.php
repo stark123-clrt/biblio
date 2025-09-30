@@ -557,8 +557,8 @@ include "../includes/header.php";
                 <!-- Statistiques -->
                 <div class="glass-card rounded-3xl p-8 slide-up floating-animation">
                     <h3 class="text-2xl font-bold mb-8 text-gray-800 dark:text-white text-center">
-                        <i class="fas fa-chart-bar mr-3 text-blue-600 dark:text-blue-400"></i>
-                        Mes Statistiques
+                        <!-- <i class="fas fa-chart-bar mr-3 text-blue-600 dark:text-blue-400"></i>
+                        Mes Statistiques -->
                     </h3>
                     
                     <div class="grid grid-cols-2 gap-4">
@@ -584,8 +584,8 @@ include "../includes/header.php";
                 <!-- Informations du profil -->
                 <div class="glass-card rounded-3xl p-8 slide-up">
                     <h3 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
-                        <i class="fas fa-info-circle mr-3 text-green-600 dark:text-green-400"></i>
-                        Informations
+                        <!-- <i class="fas fa-info-circle mr-3 text-green-600 dark:text-green-400"></i>
+                        Informations -->
                     </h3>
                     
                     <div class="space-y-2">
@@ -650,8 +650,8 @@ include "../includes/header.php";
                 <!-- Formulaire de mise à jour du profil -->
                 <div class="glass-card rounded-3xl p-8 slide-up">
                     <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white">
-                        <i class="fas fa-user-edit mr-3 text-blue-600 dark:text-blue-400"></i>
-                        Modifier mon profil
+                        <!-- <i class="fas fa-user-edit mr-3 text-blue-600 dark:text-blue-400"></i>
+                        Modifier mon profil -->
                     </h2>
                     
                     <form method="POST" enctype="multipart/form-data" class="space-y-6">

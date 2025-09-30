@@ -155,7 +155,7 @@ include "includes/header.php";
                 
                 <!-- Répartition des notes avec design moderne -->
                 <div class="flex-1 w-full">
-                    <h3 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Répartition des Notes</h3>
+                    <h3 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white"></h3>
                     <div class="space-y-3">
                         <?php foreach ($ratings_distribution as $rating_val => $data): ?>
                             <div class="flex items-center group">
@@ -204,8 +204,6 @@ include "includes/header.php";
         <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-6 mb-8">
             <form action="testimonials.php" method="GET" class="space-y-4">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-                    <i class="fas fa-filter mr-2 text-blue-600 dark:text-blue-400"></i>
-                    Filtrer les recommandations
                 </h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

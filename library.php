@@ -89,7 +89,7 @@ include "includes/header.php";
                 Bibliothèque Numérique
             </h1>
             <p class="text-xl text-gray-600 dark:text-gray-300 font-light max-w-2xl mx-auto">
-                Découvrez notre collection de livres spirituels et ressources pour votre croissance personnelle
+                Découvrez notre collection de livres et ressources pour votre croissance personnelle
             </p>
         </div>
 
@@ -154,8 +154,6 @@ include "includes/header.php";
         <div class="bg-white/60 dark:bg-gray-800/60 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-6 mb-8">
             <form action="library.php" method="GET" class="space-y-4">
                 <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-                    <i class="fas fa-search mr-2 text-blue-600 dark:text-blue-400"></i>
-                    Rechercher et filtrer
                 </h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

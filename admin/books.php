@@ -917,7 +917,7 @@ include "../includes/header.php";
         <!-- Pied de page -->
         <footer class="bg-gray-800 text-white py-4">
             <div class="container mx-auto px-4 text-center">
-                <p>&copy; <?php echo date('Y'); ?> Bibliothèque Chrétienne - Interface d'administration</p>
+                <p>&copy; <?php echo date('Y'); ?> Bibliothèque - Interface d'administration</p>
             </div>
         </footer>
     </div>

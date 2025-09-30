@@ -1,21 +1,45 @@
 version: '3.8'
 
 services:
-  # Service PHP avec Apache
+  # Votre service PHP existant (gardé identique)
   php-apache:
     build:
-      context: .  # Utiliser le Dockerfile présent dans le répertoire courant
-      dockerfile: Dockerfile  # Spécifier le nom du Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: php-apache
     ports:
-      - "8082:80"  # Le port 8082 pour accéder à l'application
+      - "8082:80"
     volumes:
-      - ./:/var/www/html/  # Montre le répertoire actuel du projet dans le conteneur
+      - ./src:/var/www/html/  # Plus spécifique que ./
+      - ./data/audio:/var/www/html/temp/audio/
+      - ./data/logs:/var/www/html/logs/
+    environment:
+      - DB_HOST=mysql-db
+      - DB_NAME=mydb
+      - DB_USER=user
+      - DB_PASS=userpassword
+    depends_on:
+      - mysql-db
+      - kokoro-tts  # Nouveau dépendance
     networks:
       - mynetwork
 
-  # Service MySQL
-  mysql:
+  # NOUVEAU : Service Kokoro TTS
+  kokoro-tts:
+    build:
+      context: ./python
+      dockerfile: Dockerfile
+    container_name: kokoro-tts
+    volumes:
+      - ./data/audio:/app/audio/
+      - ./data/models:/app/models/
+    environment:
+      - TRANSFORMERS_CACHE=/app/models
+    networks:
+      - mynetwork
+
+  # Vos services existants (identiques)
+  mysql-db:
     image: mysql:8.0
     container_name: mysql-db
     environment:
@@ -29,23 +53,20 @@ services:
     networks:
       - mynetwork
 
-  # Service PHPMyAdmin
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
     ports:
-      - "8083:80"  # Accéder à PHPMyAdmin via le port 8083
+      - "8083:80"
     environment:
       PMA_HOST: mysql-db
       PMA_PORT: 3306
     networks:
       - mynetwork
 
-# Volumes pour persister les données
 volumes:
   mysql-data:
 
-# Réseau personnalisé pour les services
 networks:
   mynetwork:
     driver: bridge

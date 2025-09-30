@@ -84,7 +84,7 @@ include "../includes/header.php";
         <div class="text-center mb-12">
             <div class="relative inline-block">
                 <h1 class="text-5xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-                    <i class="fas fa-user-circle mr-4 text-blue-600 dark:text-blue-400"></i>
+                    
                     Mon Espace Lecture
                 </h1>
                 <div class="absolute -inset-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-lg -z-10"></div>
@@ -197,10 +197,7 @@ include "../includes/header.php";
         <!-- Filtres et recherche ultra-modernes -->
         <div class="glass-card rounded-3xl p-8 mb-8 backdrop-blur-lg shadow-xl border border-white/20 dark:border-gray-700/20">
             <div class="flex items-center mb-6">
-                <div class="bg-gradient-to-r from-blue-500 to-purple-500 w-10 h-10 rounded-xl flex items-center justify-center mr-3">
-                    <i class="fas fa-filter text-white"></i>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white">Filtres et recherche</h3>
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white"></h3>
             </div>
             
             <!-- Boutons de filtre modernisés -->
@@ -413,10 +410,7 @@ include "../includes/header.php";
         <!-- Activité récente avec design ultra-moderne -->
         <?php if (!empty($recent_activity)): ?>
             <div class="mt-16">
-                <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white text-center flex items-center justify-center">
-                    <i class="fas fa-history mr-3 text-blue-600 dark:text-blue-400"></i>
-                    Activité Récente
-                </h2>
+             
                 
                 <div class="glass-card rounded-3xl overflow-hidden backdrop-blur-lg shadow-2xl border border-white/20 dark:border-gray-700/20">
                     <div class="divide-y divide-gray-200/50 dark:divide-gray-700/50">
@@ -464,10 +458,6 @@ include "../includes/header.php";
         <!-- Actions rapides -->
         <?php if (!empty($library_books)): ?>
             <div class="mt-16 glass-card rounded-3xl p-8 backdrop-blur-lg shadow-xl border border-white/20 dark:border-gray-700/20">
-                <h3 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white text-center flex items-center justify-center">
-                    <i class="fas fa-bolt mr-3 text-yellow-500"></i>
-                    Actions rapides
-                </h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <a href="notes.php" class="glass-card rounded-2xl p-6 text-center hover:scale-105 transition-all duration-300 group">
                         <div class="bg-gradient-to-br from-green-500 to-green-600 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4 text-white shadow-lg group-hover:shadow-xl transition-shadow">

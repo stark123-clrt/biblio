@@ -1,5 +1,5 @@
 <?php
-// book.php - Version 100% POO avec séparation MVC complète
+// book.php
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }

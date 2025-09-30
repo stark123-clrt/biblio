@@ -7,7 +7,7 @@ if (strpos($_SERVER['PHP_SELF'], '/admin/') !== false) {
     $base_path = '../'; // Si on est dans le dossier user
 }
 
-// ✅ MODERNISATION POO - Optionnel : Récupérer les statistiques du site
+// MODERNISATION POO - Optionnel : Récupérer les statistiques du site
 $site_stats = null;
 try {
     // Charger les classes POO si pas déjà fait et si on veut afficher des stats
@@ -44,9 +44,9 @@ try {
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
-                    <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-200">Bibliothèque Chrétienne</span>
+                    <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-200">Bibliothèque Numérique</span>
                 </div>
-                <p class="text-gray-300 leading-relaxed">Une plateforme dédiée à l'enrichissement spirituel à travers la lecture et la méditation.</p>
+                <p class="text-gray-300 leading-relaxed">Une plateforme moderne dédiée à la lecture numérique et à l'accès libre aux ouvrages littéraires et éducatifs.</p>
                 <div class="flex space-x-4">
                     <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors duration-300 transform hover:-translate-y-1">
                         <i class="fab fa-facebook-f text-lg"></i>
@@ -71,7 +71,7 @@ try {
                 <ul class="space-y-3">
                     <li><a href="<?php echo $base_path; ?>index.php" class="text-gray-300 hover:text-blue-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-blue-400"></i> Accueil</a></li>
                     <li><a href="<?php echo $base_path; ?>library.php" class="text-gray-300 hover:text-blue-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-blue-400"></i> Bibliothèque</a></li>
-                    <li><a href="<?php echo $base_path; ?>testimonials.php" class="text-gray-300 hover:text-blue-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-blue-400"></i> Témoignages</a></li>
+                    <li><a href="<?php echo $base_path; ?>testimonials.php" class="text-gray-300 hover:text-blue-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-blue-400"></i> Avis Lecteurs</a></li>
                     <li><a href="#" class="text-gray-300 hover:text-blue-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-blue-400"></i> À Propos</a></li>
                     <li><a href="#" class="text-gray-300 hover:text-blue-400 transition-colors flex items-center"><i class="fas fa-chevron-right text-xs mr-2 text-blue-400"></i> Contact</a></li>
                 </ul>
@@ -85,7 +85,7 @@ try {
                 <div class="space-y-4">
                     <div class="flex items-start">
                         <i class="fas fa-envelope text-blue-400 mt-1 mr-3"></i>
-                        <a href="mailto:contact@bibliotheque-chretienne.com" class="text-gray-300 hover:text-blue-400 transition-colors">contact@bibliotheque-chretienne.com</a>
+                        <a href="mailto:contact@bibliotheque-numerique.com" class="text-gray-300 hover:text-blue-400 transition-colors">contact@bibliotheque-numerique.com</a>
                     </div>
                     <div class="flex items-start">
                         <i class="fas fa-phone text-blue-400 mt-1 mr-3"></i>
@@ -93,7 +93,7 @@ try {
                     </div>
                     <div class="flex items-start">
                         <i class="fas fa-map-marker-alt text-blue-400 mt-1 mr-3"></i>
-                        <span class="text-gray-300">123 Rue de l'Église, 75000 Paris</span>
+                        <span class="text-gray-300">123 Avenue des Lettres, 75000 Paris</span>
                     </div>
                 </div>
             </div>
@@ -103,7 +103,7 @@ try {
                 <h3 class="text-xl font-semibold mb-6 relative pb-2 text-blue-200">
                     <span class="border-b-2 border-blue-500 pb-2">Newsletter</span>
                 </h3>
-                <p class="text-gray-300 mb-4">Abonnez-vous pour recevoir les dernières nouveautés et méditations.</p>
+                <p class="text-gray-300 mb-4">Abonnez-vous pour recevoir les dernières nouveautés et recommandations littéraires.</p>
                 <form class="space-y-3">
                     <input type="email" placeholder="Votre email" class="w-full px-4 py-2 rounded bg-gray-700 border border-gray-600 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 text-white transition">
                     <button type="submit" class="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium py-2 px-6 rounded transition-all duration-300 transform hover:scale-105 shadow-lg">
@@ -117,7 +117,7 @@ try {
         <div class="border-t border-gray-700 mt-12 pt-8">
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <p class="text-gray-400 text-sm mb-4 md:mb-0">
-                    &copy; <?php echo date('Y'); ?> Bibliothèque Chrétienne. Tous droits réservés. | Développé par <span class="text-blue-400">Christian Ondiyo</span>
+                    &copy; <?php echo date('Y'); ?> Bibliothèque Numérique. Tous droits réservés. | Développé par <span class="text-blue-400">Christian Ondiyo</span>
                 </p>
                 <div class="flex space-x-6">
                     <a href="#" class="text-gray-400 hover:text-blue-400 text-sm transition-colors">Mentions légales</a>

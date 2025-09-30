@@ -382,10 +382,7 @@ class User
 }
 
 
-
-
-
-//CLASSE 2
+//CLASSE BOOK 2
 
 class Book
 {
@@ -413,9 +410,6 @@ class Book
     {
         $this->hydrate($data);
     }
-
-
-
     public function hydrate(array $data): void
     {
         foreach ($data as $key => $value) {

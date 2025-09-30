@@ -138,20 +138,20 @@ try {
     // CONFIGURATION PIPER
     // $voiceModel = 'fr_FR-siwis-medium.onnx';
 
-    $voiceModel = 'fr_FR-upmc-medium.onnx';
+    $voiceModel = 'fr-FR-YvesNeural';
 
     //$voiceModel = 'fr_FR-siwis-low.onnx';  plus rapide moins memoire
     
     // Paramètres optimisés pour la qualité et la vitesse
     
-    $length_scale = 1.1;   // ← Vitesse normale
-    $noise_scale = 0.1;    // ← Plus d'expression (au lieu de 0.3)
+    $length_scale = 2.0;   // ← Vitesse normale
+    $noise_scale = 0.5;    // ← Plus d'expression (au lieu de 0.3)
     $noise_w = 0.9;
     
 
     // CONSTRUCTION DE LA COMMANDE PIPER
     $piperCommand = sprintf(
-        'wsl bash -c "cd /mnt/c/Users/chris/piper && timeout 30s cat %s | ./piper --model %s --length_scale %.2f --noise_scale %.2f --noise_w %.2f --output_file %s 2>&1"',
+        'wsl bash -c "cd /mnt/c/Users/chris/edge && source edge_env/bin/activate && timeout 30s cat %s | python edge_piper.py --model %s --length_scale %.2f --noise_scale %.2f --noise_w %.2f --output_file %s 2>&1"',
         escapeshellarg($wslTempFile),
         escapeshellarg($voiceModel),
         $length_scale,
@@ -227,7 +227,8 @@ try {
         'file_size' => $finalFileSize,
         'text_length' => strlen($text),
         'voice_model' => $voiceModel,
-        'voice_engine' => 'Piper TTS',
+        // 'voice_engine' => 'Piper TTS',
+        'voice_engine' => 'Edge TTS (Microsoft)',
         'processing_time' => $executionTime . 'ms',
         'wait_time' => round($waitCount, 1) . 's',
         'parameters' => [

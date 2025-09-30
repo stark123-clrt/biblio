@@ -1077,7 +1077,7 @@ splitTextIntoChunks(text, maxLength = null) {
             formData.append('chunk_id', chunkId);
             formData.append('speed', this.readingSpeed.toString());
             
-            const response = await fetch('tts_piper.php', {
+            const response = await fetch('edge_tts.php', {
                 method: 'POST',
                 body: formData
             });

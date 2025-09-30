@@ -180,11 +180,9 @@ $page_title = "Accueil";
     <section class="py-20 bg-white dark:bg-gray-900">
         <div class="container mx-auto px-4">
             <div class="text-center mb-16 slide-up-enter">
-                <h2 class="text-4xl lg:text-5xl font-bold mb-6 text-gray-800 dark:text-white">
-                    Explorez par <span class="bg-gradient-to-r from-green-500 to-blue-500 bg-clip-text text-transparent">catégorie</span>
-                </h2>
+              
                 <p class="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-                    Trouvez facilement les livres qui correspondent à vos centres d'intérêt spirituels
+                    Trouvez facilement les livres qui correspondent à vos centres d'intérêt
                 </p>
             </div>
             

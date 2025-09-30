@@ -74,7 +74,7 @@ include "../includes/header.php";
         <div class="text-center mb-12">
             <div class="relative inline-block">
                 <h1 class="text-5xl font-extrabold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-                    <i class="fas fa-comments mr-4 text-blue-600 dark:text-blue-400"></i>
+                    <!-- <i class="fas fa-comments mr-4 text-blue-600 dark:text-blue-400"></i> -->
                     Mes Commentaires
                 </h1>
                 <div class="absolute -inset-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-lg -z-10"></div>
