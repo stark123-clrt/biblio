@@ -9,7 +9,9 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role
     exit();
 }
 
-require_once "../config/database.php";
+require_once "../classes/Core.php";
+
+$conn = getDatabase();
 
 // Messages de feedback
 $success_message = "";
