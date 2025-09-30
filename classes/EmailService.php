@@ -222,14 +222,14 @@ class EmailService
         <body>
             <div class='container'>
                 <div class='header'>
-                    <h1 style='margin: 0; font-size: 24px;'>📚 Bibliothèque Chrétienne</h1>
+                    <h1 style='margin: 0; font-size: 24px;'>📚 Bibliothèque</h1>
                     <p style='margin: 10px 0 0 0; opacity: 0.9;'>Vérification de votre compte</p>
                 </div>
                 
                 <div class='content'>
                     <h2 style='color: #333; margin-bottom: 20px;'>Bonjour {$firstName} ! 👋</h2>
                     
-                    <p>Bienvenue dans notre bibliothèque chrétienne ! Pour finaliser votre inscription et accéder à tous nos livres spirituels, veuillez vérifier votre adresse email en cliquant sur le bouton ci-dessous :</p>
+                    <p>Bienvenue dans notre bibliothèque ! Pour finaliser votre inscription et accéder à tous nos livres spirituels, veuillez vérifier votre adresse email en cliquant sur le bouton ci-dessous :</p>
                     
                     <div style='text-align: center; margin: 30px 0;'>
                         <a href='{$verificationUrl}' class='button'>✅ Vérifier mon email</a>
@@ -242,7 +242,7 @@ class EmailService
                 </div>
                 
                 <div class='footer'>
-                    <p>© 2025 Bibliothèque Chrétienne. Tous droits réservés.</p>
+                    <p>© 2025 Bibliothèque. Tous droits réservés.</p>
                     <p>Si vous n'avez pas créé de compte, ignorez simplement cet email.</p>
                 </div>
             </div>
@@ -257,11 +257,11 @@ class EmailService
     {
         $firstName = $user->getFirstName() ?? $user->getUsername();
         return "
-        Bibliothèque Chrétienne - Vérification d'email
+        Bibliothèque - Vérification d'email
         
         Bonjour {$firstName} !
         
-        Bienvenue dans notre bibliothèque chrétienne ! Pour finaliser votre inscription et accéder à tous nos livres spirituels, veuillez vérifier votre adresse email en cliquant sur le lien ci-dessous :
+        Bienvenue dans notre bibliothèque ! Pour finaliser votre inscription et accéder à tous nos livres, veuillez vérifier votre adresse email en cliquant sur le lien ci-dessous :
         
         {$verificationUrl}
         
@@ -269,7 +269,7 @@ class EmailService
         
         Si vous n'avez pas créé de compte, ignorez simplement cet email.
         
-        © 2025 Bibliothèque Chrétienne. Tous droits réservés.
+        © 2025 Bibliothèque. Tous droits réservés.
         ";
     }
 
@@ -348,14 +348,14 @@ class EmailService
         <body>
             <div class='container'>
                 <div class='header'>
-                    <h1 style='margin: 0; font-size: 24px;'>🔐 Bibliothèque Chrétienne</h1>
+                    <h1 style='margin: 0; font-size: 24px;'> Bibliothèque </h1>
                     <p style='margin: 10px 0 0 0; opacity: 0.9;'>Réinitialisation de mot de passe</p>
                 </div>
                 
                 <div class='content'>
                     <h2 style='color: #333; margin-bottom: 20px;'>Bonjour {$firstName} ! 👋</h2>
                     
-                    <p>Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte sur notre bibliothèque chrétienne.</p>
+                    <p>Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte sur notre bibliothèque.</p>
                     
                     <div class='warning-box'>
                         <p style='margin: 0; color: #92400e; font-weight: 600;'>⚠️ Si vous n'avez pas demandé cette réinitialisation, ignorez simplement cet email. Votre mot de passe restera inchangé.</p>
@@ -377,7 +377,7 @@ class EmailService
                 </div>
                 
                 <div class='footer'>
-                    <p>© 2025 Bibliothèque Chrétienne. Tous droits réservés.</p>
+                    <p>© 2025 Bibliothèque. Tous droits réservés.</p>
                     <p>Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email en toute sécurité.</p>
                 </div>
             </div>
@@ -393,7 +393,7 @@ class EmailService
         $firstName = $user->getFirstName() ?? $user->getUsername();
         $timeRemaining = $user->getPasswordResetTimeRemaining();
         return "
-        Bibliothèque Chrétienne - Réinitialisation de mot de passe
+        Bibliothèque - Réinitialisation de mot de passe
         
         Bonjour {$firstName} !
         
@@ -409,7 +409,7 @@ class EmailService
         
         Si vous n'avez pas demandé cette réinitialisation, vous pouvez ignorer cet email en toute sécurité.
         
-        © 2025 Bibliothèque Chrétienne. Tous droits réservés.
+        © 2025 Bibliothèque . Tous droits réservés.
         ";
     }
 }
