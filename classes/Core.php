@@ -78,11 +78,11 @@ class Config
         // Configuration de la base de données - ADAPTÉE À TON PROJET
         $this->config = [
             'database' => [
-                'host' => $_ENV['DB_HOST'] ?? 'localhost',
-                'port' => $_ENV['DB_PORT'] ?? '3306',
-                'dbname' => $_ENV['DB_NAME'] ?? 'mydb',
-                'username' => $_ENV['DB_USER'] ?? 'root',
-                'password' => $_ENV['DB_PASS'] ?? '',
+                'host' => $_ENV['DB_HOST'] ,
+                'port' => $_ENV['DB_PORT'] ,
+                'dbname' => $_ENV['DB_NAME'],
+                'username' => $_ENV['DB_USER'] ,
+                'password' => $_ENV['DB_PASS'] ,
                 'charset' => 'utf8',
                 'options' => [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
