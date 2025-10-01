@@ -209,7 +209,7 @@ jobs:
       - name: Health check staging
         run: |
           echo "🏥 Vérification de santé..."
-          # curl -f https://staging.bibliotheque-chretienne.com/health || exit 1
+          # curl -f https://staging.bibliotheque-enligne.com/health || exit 1
 
   # =========================================
   # JOB 5: DÉPLOIEMENT PRODUCTION - TOUJOURS ACTIF
@@ -222,7 +222,7 @@ jobs:
 
     environment:
       name: production
-      url: https://bibliotheque-chretienne.com
+      url: https://bibliotheque-enligne.com
 
     steps:
       - name: Checkout code
