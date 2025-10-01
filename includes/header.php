@@ -92,12 +92,12 @@ function getCorrectImagePath($imagePath, $basePath) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque Chrétienne - <?php echo $page_title ?? 'Accueil'; ?></title>
+    <title>Bibliothèque- <?php echo $page_title ?? 'Accueil'; ?></title>
 
     
     
-    <meta name="description" content="Bibliothèque chrétienne en ligne avec des livres spirituels, témoignages et ressources pour votre croissance spirituelle">
-    <meta name="keywords" content="bibliothèque chrétienne, livres spirituels, témoignages, croissance spirituelle">
+    <meta name="description" content="">
+    <meta name="keywords" content="bibliothèque">
 
     <link rel="stylesheet" href="style/index.css">
     <link rel="icon" href="<?php echo $base_path; ?>assets/favicon.ico" type="image/x-icon">

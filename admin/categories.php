@@ -22,9 +22,10 @@ $error_message = "";
 $edit_category = [
     'id' => '',
     'name' => '',
-    'description' => '',
-    'parent_id' => null
+    'description' => ''
 ];
+
+
 
 // Traitement de la suppression d'une catégorie
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
@@ -38,38 +39,28 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     
     if ($category) {
         try {
-            // Vérifier si la catégorie est utilisée comme parent
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM categories WHERE parent_id = :id");
+            // Vérifier si des livres sont associés à cette catégorie
+            $stmt = $conn->prepare("SELECT COUNT(*) FROM book_categories WHERE category_id = :id");
             $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
             $stmt->execute();
-            $has_children = $stmt->fetchColumn() > 0;
+            $has_books = $stmt->fetchColumn() > 0;
             
-            if ($has_children) {
-                $error_message = "Cette catégorie ne peut pas être supprimée car elle est utilisée comme catégorie parente.";
+            if ($has_books && !isset($_GET['force'])) {
+                $error_message = "Des livres sont associés à cette catégorie. <a href='categories.php?action=delete&id={$category_id}&force=1' class='text-red-600 hover:text-red-800'>Forcer la suppression</a>";
             } else {
-                // Vérifier si des livres sont associés à cette catégorie
-                $stmt = $conn->prepare("SELECT COUNT(*) FROM book_categories WHERE category_id = :id");
-                $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
-                $stmt->execute();
-                $has_books = $stmt->fetchColumn() > 0;
-                
-                if ($has_books && !isset($_GET['force'])) {
-                    $error_message = "Des livres sont associés à cette catégorie. <a href='categories.php?action=delete&id={$category_id}&force=1' class='text-red-600 hover:text-red-800'>Forcer la suppression</a>";
-                } else {
-                    // Supprimer les relations livre-catégorie si elles existent
-                    if ($has_books) {
-                        $stmt = $conn->prepare("DELETE FROM book_categories WHERE category_id = :id");
-                        $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
-                        $stmt->execute();
-                    }
-                    
-                    // Supprimer la catégorie
-                    $stmt = $conn->prepare("DELETE FROM categories WHERE id = :id");
+                // Supprimer les relations livre-catégorie si elles existent
+                if ($has_books) {
+                    $stmt = $conn->prepare("DELETE FROM book_categories WHERE category_id = :id");
                     $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
-                    
-                    if ($stmt->execute()) {
-                        $success_message = "La catégorie \"" . htmlspecialchars($category['name']) . "\" a été supprimée avec succès.";
-                    }
+                    $stmt->execute();
+                }
+                
+                // Supprimer la catégorie
+                $stmt = $conn->prepare("DELETE FROM categories WHERE id = :id");
+                $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
+                
+                if ($stmt->execute()) {
+                    $success_message = "La catégorie \"" . htmlspecialchars($category['name']) . "\" a été supprimée avec succès.";
                 }
             }
         } catch (PDOException $e) {
@@ -79,6 +70,8 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
         $error_message = "Catégorie introuvable.";
     }
 }
+
+
 
 // Récupérer une catégorie pour l'édition
 if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
@@ -97,11 +90,10 @@ if (isset($_GET['action']) && $_GET['action'] == 'edit' && isset($_GET['id'])) {
 }
 
 // Traitement du formulaire d'ajout/modification de catégorie
+// Traitement du formulaire d'ajout/modification de catégorie
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_category'])) {
     $name = trim($_POST['name']);
     $description = trim($_POST['description']);
-    $parent_id = !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null;
-    
     $category_id = isset($_POST['category_id']) ? (int)$_POST['category_id'] : null;
     
     // Validation basique
@@ -118,65 +110,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_category'])) {
             if ($stmt->fetchColumn() > 0) {
                 $error_message = "Une catégorie avec ce nom existe déjà.";
             } else {
-                // Vérifier les boucles de parenté pour éviter les références circulaires
-                if ($category_id && $parent_id) {
-                    // Vérifier si on essaie de définir comme parent une de ses propres sous-catégories
-                    $is_child = false;
-                    $check_id = $parent_id;
+                if ($category_id) {
+                    // Mise à jour
+                    $stmt = $conn->prepare("UPDATE categories SET name = :name, description = :description WHERE id = :id");
+                    $stmt->bindParam(':name', $name);
+                    $stmt->bindParam(':description', $description);
+                    $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
                     
-                    while ($check_id && !$is_child) {
-                        $stmt = $conn->prepare("SELECT parent_id FROM categories WHERE id = :id");
-                        $stmt->bindParam(':id', $check_id, PDO::PARAM_INT);
-                        $stmt->execute();
-                        $check_parent = $stmt->fetchColumn();
-                        
-                        if ($check_parent == $category_id) {
-                            $is_child = true;
-                        }
-                        $check_id = $check_parent;
+                    if ($stmt->execute()) {
+                        $success_message = "Catégorie mise à jour avec succès.";
+                        // Réinitialiser le formulaire
+                        $edit_category = [
+                            'id' => '',
+                            'name' => '',
+                            'description' => ''
+                        ];
                     }
+                } else {
+                    // Ajout
+                    $stmt = $conn->prepare("INSERT INTO categories (name, description) VALUES (:name, :description)");
+                    $stmt->bindParam(':name', $name);
+                    $stmt->bindParam(':description', $description);
                     
-                    if ($is_child) {
-                        $error_message = "Une catégorie ne peut pas avoir une de ses sous-catégories comme parent.";
-                    }
-                }
-                
-                if (empty($error_message)) {
-                    if ($category_id) {
-                        // Mise à jour
-                        $stmt = $conn->prepare("UPDATE categories SET name = :name, description = :description, parent_id = :parent_id WHERE id = :id");
-                        $stmt->bindParam(':name', $name);
-                        $stmt->bindParam(':description', $description);
-                        $stmt->bindParam(':parent_id', $parent_id);
-                        $stmt->bindParam(':id', $category_id, PDO::PARAM_INT);
-                        
-                        if ($stmt->execute()) {
-                            $success_message = "Catégorie mise à jour avec succès.";
-                            // Réinitialiser le formulaire
-                            $edit_category = [
-                                'id' => '',
-                                'name' => '',
-                                'description' => '',
-                                'parent_id' => null
-                            ];
-                        }
-                    } else {
-                        // Ajout
-                        $stmt = $conn->prepare("INSERT INTO categories (name, description, parent_id) VALUES (:name, :description, :parent_id)");
-                        $stmt->bindParam(':name', $name);
-                        $stmt->bindParam(':description', $description);
-                        $stmt->bindParam(':parent_id', $parent_id);
-                        
-                        if ($stmt->execute()) {
-                            $success_message = "Catégorie ajoutée avec succès.";
-                            // Réinitialiser le formulaire
-                            $edit_category = [
-                                'id' => '',
-                                'name' => '',
-                                'description' => '',
-                                'parent_id' => null
-                            ];
-                        }
+                    if ($stmt->execute()) {
+                        $success_message = "Catégorie ajoutée avec succès.";
+                        // Réinitialiser le formulaire
+                        $edit_category = [
+                            'id' => '',
+                            'name' => '',
+                            'description' => ''
+                        ];
                     }
                 }
             }
@@ -188,20 +151,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['save_category'])) {
 
 // Récupérer toutes les catégories pour l'affichage
 $stmt = $conn->prepare("SELECT c.*, 
-                      (SELECT COUNT(*) FROM book_categories WHERE category_id = c.id) as book_count,
-                      (SELECT COUNT(*) FROM categories WHERE parent_id = c.id) as children_count,
-                      p.name as parent_name
+                      (SELECT COUNT(*) FROM book_categories WHERE category_id = c.id) as book_count
                       FROM categories c
-                      LEFT JOIN categories p ON c.parent_id = p.id
                       ORDER BY c.name ASC");
 $stmt->execute();
 $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-// Récupérer toutes les catégories pour le menu déroulant (sauf la catégorie en cours d'édition)
-$stmt = $conn->prepare("SELECT id, name FROM categories WHERE id != :id ORDER BY name ASC");
-$stmt->bindParam(':id', $edit_category['id']);
-$stmt->execute();
-$category_options = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $page_title = "Gestion des catégories - Administration";
 
@@ -213,7 +167,7 @@ include "../includes/header.php";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque Chrétienne - <?php echo $page_title ?? 'Administration'; ?></title>
+    <title>Bibliothèque<?php echo $page_title ?? 'Administration'; ?></title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- jQuery pour AJAX -->
@@ -293,18 +247,7 @@ include "../includes/header.php";
                                              class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"><?php echo htmlspecialchars($edit_category['description'] ?? ''); ?></textarea>
                                 </div>
                                 
-                                <div class="mb-6">
-                                    <label for="parent_id" class="block text-gray-700 font-bold mb-2">Catégorie parente</label>
-                                    <select id="parent_id" name="parent_id"
-                                           class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                        <option value="">Aucune (catégorie principale)</option>
-                                        <?php foreach ($category_options as $option): ?>
-                                            <option value="<?php echo $option['id']; ?>" <?php echo $edit_category['parent_id'] == $option['id'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($option['name']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
+                           
                                 
                                 <div class="flex justify-between">
                                     <button type="submit" name="save_category" 
@@ -330,27 +273,21 @@ include "../includes/header.php";
                                     <thead>
                                         <tr class="bg-gray-100">
                                             <th class="py-2 px-4 border-b text-left">Nom</th>
-                                            <th class="py-2 px-4 border-b text-left">Catégorie parente</th>
+                                           
                                             <th class="py-2 px-4 border-b text-center">Livres</th>
-                                            <th class="py-2 px-4 border-b text-center">Sous-catégories</th>
+                                           
                                             <th class="py-2 px-4 border-b text-center">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php foreach ($categories as $category): ?>
                                             <tr class="hover:bg-gray-50">
-                                                <td class="py-2 px-4 border-b">
-                                                    <?php echo htmlspecialchars($category['name']); ?>
-                                                </td>
-                                                <td class="py-2 px-4 border-b">
-                                                    <?php echo $category['parent_name'] ? htmlspecialchars($category['parent_name']) : '<span class="text-gray-400">-</span>'; ?>
-                                                </td>
-                                                <td class="py-2 px-4 border-b text-center">
-                                                    <?php echo $category['book_count']; ?>
-                                                </td>
-                                                <td class="py-2 px-4 border-b text-center">
-                                                    <?php echo $category['children_count']; ?>
-                                                </td>
+                                            <td class="py-2 px-4 border-b">
+    <?php echo htmlspecialchars($category['name']); ?>
+</td>
+<td class="py-2 px-4 border-b text-center">
+    <?php echo $category['book_count']; ?>
+</td>
                                                 <td class="py-2 px-4 border-b text-center">
                                                     <a href="categories.php?action=edit&id=<?php echo $category['id']; ?>" class="text-blue-600 hover:text-blue-800 mx-1">
                                                         <i class="fas fa-edit"></i>

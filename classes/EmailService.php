@@ -33,7 +33,7 @@ class EmailService
     {
         try {
             $verificationUrl = $this->generateVerificationUrl($verificationToken);
-            $subject = "✅ Vérifiez votre adresse email - Bibliothèque Chrétienne";
+            $subject = "✅ Vérifiez votre adresse email - Bibliothèque";
             $htmlBody = $this->getVerificationEmailTemplate($user, $verificationUrl);
             $textBody = $this->getVerificationEmailTextTemplate($user, $verificationUrl);
             return $this->sendEmail($user->getEmail(), $user->getFirstName() . ' ' . $user->getLastName(), $subject, $htmlBody, $textBody);

@@ -467,7 +467,7 @@ include "../includes/header.php";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque Chrétienne - <?php echo $page_title ?? 'Administration'; ?></title>
+    <title>Bibliothèque <?php echo $page_title ?? 'Administration'; ?></title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- jQuery pour AJAX -->

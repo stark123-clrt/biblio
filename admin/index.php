@@ -24,7 +24,6 @@ $stats = [
     'total_comments' => $conn->query("SELECT COUNT(*) FROM comments")->fetchColumn(),
     'pending_comments' => $conn->query("SELECT COUNT(*) FROM comments WHERE is_validated = 0")->fetchColumn(),
     'total_notes' => $conn->query("SELECT COUNT(*) FROM notes")->fetchColumn(),
-    'total_reading_sessions' => $conn->query("SELECT COUNT(*) FROM reading_sessions")->fetchColumn()
 ];
 
 // Récupérer les 5 derniers utilisateurs inscrits
@@ -48,12 +47,14 @@ $stmt->execute();
 $recent_comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Récupérer les livres les plus lus
-$stmt = $conn->prepare("SELECT b.id, b.title, b.author, COUNT(rs.id) as read_count
+// Livres les plus récents à la place (puisque reading_sessions n'existe plus)
+$stmt = $conn->prepare("SELECT b.id, b.title, b.author, 
+                        (SELECT COUNT(*) FROM comments WHERE book_id = b.id) as comment_count
                         FROM books b
-                        LEFT JOIN reading_sessions rs ON b.id = rs.book_id
-                        GROUP BY b.id
-                        ORDER BY read_count DESC
+                        ORDER BY b.created_at DESC
                         LIMIT 5");
+
+
 $stmt->execute();
 $most_read_books = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -65,7 +66,7 @@ include "../includes/header.php";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque Chrétienne - <?php echo $page_title ?? 'Accueil'; ?></title>
+    <title>Bibliothèque<?php echo $page_title ?? 'Accueil'; ?></title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- jQuery pour AJAX -->
@@ -128,7 +129,7 @@ include "../includes/header.php";
                 <i class="fas fa-sticky-note text-purple-600 text-2xl"></i>
             </div>
             <p class="text-3xl font-bold"><?php echo $stats['total_notes']; ?></p>
-            <p class="text-gray-600"><?php echo $stats['total_reading_sessions']; ?> sessions de lecture</p>
+            <p class="text-gray-600">Notes personnelles</p>
             <a href="#" class="text-purple-600 hover:text-purple-800 text-sm mt-4 inline-block">
                 Voir les statistiques <i class="fas fa-chevron-right ml-1"></i>
             </a>
@@ -280,7 +281,7 @@ include "../includes/header.php";
         <!-- Livres les plus lus -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold">Livres les plus lus</h2>
+                <h2 class="text-xl font-bold">Livres récents les plus commentés</h2>
                 <a href="books.php" class="text-purple-600 hover:text-purple-800">Voir tous</a>
             </div>
             
@@ -290,7 +291,7 @@ include "../includes/header.php";
                         <tr class="bg-gray-100">
                             <th class="py-2 px-4 text-left">Titre</th>
                             <th class="py-2 px-4 text-left">Auteur</th>
-                            <th class="py-2 px-4 text-center">Lectures</th>
+                            <th class="py-2 px-4 text-center">Commentaires</th>
                             <th class="py-2 px-4 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -299,7 +300,7 @@ include "../includes/header.php";
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="py-2 px-4"><?php echo htmlspecialchars($book['title']); ?></td>
                                 <td class="py-2 px-4"><?php echo htmlspecialchars($book['author'] ?? 'Non spécifié'); ?></td>
-                                <td class="py-2 px-4 text-center"><?php echo $book['read_count']; ?></td>
+                                <td class="py-2 px-4 text-center"><?php echo $book['comment_count']; ?></td>
                                 <td class="py-2 px-4 text-center">
                                     <a href="books.php?action=edit&id=<?php echo $book['id']; ?>" class="text-blue-600 hover:text-blue-800 mx-1">
                                         <i class="fas fa-edit"></i>

@@ -47,7 +47,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
                 $conn->beginTransaction();
                 
                 // Supprimer les données associées à l'utilisateur
-                $tables = ['notes', 'comments', 'bookmarks', 'reading_sessions', 'reading_history', 'user_library'];
+               $tables = ['notes', 'comments', 'bookmarks', 'reading_history', 'user_library'];
                 
                 foreach ($tables as $table) {
                     $stmt = $conn->prepare("DELETE FROM $table WHERE user_id = :user_id");
@@ -287,7 +287,7 @@ include "../includes/header.php";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque Chrétienne - <?php echo $page_title ?? 'Administration'; ?></title>
+    <title>Bibliothèque<?php echo $page_title ?? 'Administration'; ?></title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- jQuery pour AJAX -->

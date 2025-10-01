@@ -189,7 +189,7 @@ $page_title = "Gestion des commentaires - Administration";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bibliothèque Chrétienne - <?php echo $page_title ?? 'Administration'; ?></title>
+    <title>Bibliothèque<?php echo $page_title ?? 'Administration'; ?></title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- jQuery pour AJAX -->
@@ -203,7 +203,7 @@ $page_title = "Gestion des commentaires - Administration";
         <header class="bg-blue-800 text-white shadow-md">
             <div class="container mx-auto px-4 py-4">
                 <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold">Administration - Bibliothèque Chrétienne</h1>
+                    <h1 class="text-2xl font-bold">Administration - Bibliothèque</h1>
                     
                     <div class="flex items-center space-x-4">
                         <a href="index.php" class="hover:text-blue-200">

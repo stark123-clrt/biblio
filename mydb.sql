@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : sam. 27 sep. 2025 à 20:53
+-- Généré le : mer. 01 oct. 2025 à 17:35
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -70,11 +70,9 @@ CREATE TABLE `books` (
 --
 
 INSERT INTO `books` (`id`, `title`, `description`, `author`, `cover_image`, `file_path`, `pages_count`, `publication_year`, `publisher`, `is_featured`, `views_count`, `created_at`, `updated_at`) VALUES
-(2, 'Bonjour Saint Esprit', 'Bonjour Saint Esprit de benny Hinn', 'Benny hinn', '../assets/uploads/covers/1758895646_Bonjour_Saint_Esprit.png', '../assets/uploads/books/1758991686_Bonjour_Saint_Esprit.pdf', 263, 2010, 'Benny hinn', 1, 33, '2025-06-26 17:14:04', '2025-09-27 16:48:06'),
-(4, 'La foi qui bouge vos problemes', 'La foi qui bouge vos problèmes avec Kenneth Hagin', 'Kenneth E.Hagin', '../assets/uploads/covers/1758895506_La_foi_qui_bouge_vos_problemes.png', '../assets/uploads/books/1750959823_La_foi_qui_bouge_vos_problemes.pdf', 139, 1981, 'Kenneth E.Hagin', 1, 29, '2025-06-26 17:43:43', '2025-09-26 14:05:06'),
-(5, '4 SECRETS D\'UN MARIAGE RÉUSSI', '4 SECRETS D\'UN MARIAGE RÉUSSI Yvan Castanou', 'Yvan Castanou', '../assets/uploads/covers/1758895469_4_SECRETS_D\'UN_MARIAGE_RÉUSSI.png', '../assets/uploads/books/1758896621_4_SECRETS_D\'UN_MARIAGE_RÉUSSI.pdf', 144, 2020, 'Yvan Castanou', 1, 60, '2025-06-26 17:55:55', '2025-09-27 16:00:51'),
-(7, 'Comprendre la prière', 'Comprendre la prière de Prophète Avenir Mola Docteur ecrivain', 'Prophète Avenir Mola Docteur ecrivain', '../assets/uploads/covers/1758895437_Comprendre_la_prière.png', '../assets/uploads/books/1751556018_Comprendre_la_prière.pdf', 168, 2024, 'Prophète Avenir Mola Docteur ecrivain', 1, 87, '2025-07-03 15:20:18', '2025-09-27 16:20:32'),
-(8, 'L\'art d\'être Berger', 'Livre L\'art d\'être Berger de  Dag Heward-Mills', 'Dag Heward-Mills', '../assets/uploads/covers/1758895412_L\'art_d\'être_Berger.png', '../assets/uploads/books/1758963714_L\'art_d\'être_Berger.pdf', 273, 2020, 'Dag Heward-Mills', 1, 50, '2025-07-04 16:50:19', '2025-09-27 09:04:48');
+(2, 'Bonjour Saint Esprit', 'Bonjour Saint Esprit de benny Hinn', 'Benny hinn', '../assets/uploads/covers/1758895646_Bonjour_Saint_Esprit.png', '../assets/uploads/books/1759049935_Bonjour_Saint_Esprit.pdf', 263, 2010, 'Benny hinn', 1, 33, '2025-06-26 17:14:04', '2025-09-28 08:58:55'),
+(5, '4 SECRETS D\'UN MARIAGE RÉUSSI', '4 SECRETS D\'UN MARIAGE RÉUSSI Yvan Castanou', 'Yvan Castanou', '../assets/uploads/covers/1758895469_4_SECRETS_D\'UN_MARIAGE_RÉUSSI.png', '../assets/uploads/books/1758896621_4_SECRETS_D\'UN_MARIAGE_RÉUSSI.pdf', 144, 2020, 'Yvan Castanou', 1, 62, '2025-06-26 17:55:55', '2025-09-28 11:43:26'),
+(8, 'L\'art d\'être Berger', 'Livre L\'art d\'être Berger de  Dag Heward-Mills', 'Dag Heward-Mills', '../assets/uploads/covers/1758895412_L\'art_d\'être_Berger.png', '../assets/uploads/books/1758963714_L\'art_d\'être_Berger.pdf', 273, 2020, 'Dag Heward-Mills', 1, 62, '2025-07-04 16:50:19', '2025-10-01 07:15:58');
 
 -- --------------------------------------------------------
 
@@ -87,6 +85,13 @@ CREATE TABLE `book_categories` (
   `category_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Déchargement des données de la table `book_categories`
+--
+
+INSERT INTO `book_categories` (`book_id`, `category_id`) VALUES
+(8, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -97,7 +102,6 @@ CREATE TABLE `categories` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `description` text DEFAULT NULL,
-  `parent_id` int(11) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -106,13 +110,13 @@ CREATE TABLE `categories` (
 -- Déchargement des données de la table `categories`
 --
 
-INSERT INTO `categories` (`id`, `name`, `description`, `parent_id`, `created_at`, `updated_at`) VALUES
-(1, 'Théologie', 'Livres sur la doctrine et les études théologiques', NULL, '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
-(2, 'Dévotion', 'Livres pour la croissance spirituelle personnelle', NULL, '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
-(3, 'Histoire de l\'Église', 'Livres sur l\'histoire du christianisme', NULL, '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
-(4, 'Biographies', 'Biographies de personnages bibliques et de chrétiens importants', NULL, '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
-(5, 'Études bibliques', 'Commentaires et études des livres de la Bible', NULL, '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
-(6, 'IBOOK', '', NULL, '2025-07-08 08:49:33', '2025-07-08 08:49:33');
+INSERT INTO `categories` (`id`, `name`, `description`, `created_at`, `updated_at`) VALUES
+(1, 'Théologie', 'Livres sur la doctrine et les études théologiques', '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
+(2, 'Dévotion', 'Livres pour la croissance spirituelle personnelle', '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
+(3, 'Histoire de l\'Église', 'Livres sur l\'histoire du christianisme', '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
+(4, 'Biographies', 'Biographies de personnages bibliques et de chrétiens importants', '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
+(5, 'Études bibliques', 'Commentaires et études des livres de la Bible', '2025-04-30 18:56:00', '2025-04-30 18:56:00'),
+(6, 'IBOOK', '', '2025-07-08 08:49:33', '2025-07-08 08:49:33');
 
 -- --------------------------------------------------------
 
@@ -138,18 +142,14 @@ CREATE TABLE `comments` (
 --
 
 INSERT INTO `comments` (`id`, `user_id`, `book_id`, `comment_text`, `rating`, `is_validated`, `is_featured`, `is_recommended`, `created_at`, `updated_at`) VALUES
-(2, 2, 4, 'c\'etais puissant en vrai', 5, 1, 0, 0, '2025-06-26 18:43:56', '2025-06-26 18:43:56'),
 (3, 2, 5, 'Colle', 5, 1, 0, 0, '2025-06-26 21:19:59', '2025-06-26 21:19:59'),
 (5, NULL, 5, 'Coll trop coll', 5, 1, 0, 0, '2025-06-30 16:36:34', '2025-06-30 16:36:34'),
 (7, 2, 8, 'trop colle', 5, 1, 0, 0, '2025-07-04 16:53:37', '2025-07-04 16:53:37'),
 (8, NULL, 5, 'cool c\'est super', 5, 1, 0, 0, '2025-07-20 20:30:13', '2025-07-20 20:30:13'),
-(12, NULL, 7, 'colle', 5, 1, 0, 0, '2025-07-21 11:43:53', '2025-07-21 11:43:53'),
 (13, NULL, 8, 'quand meme', 3, 1, 0, 0, '2025-07-21 13:40:17', '2025-07-21 13:40:17'),
 (14, NULL, 8, 'quand meme', 3, 1, 0, 0, '2025-07-21 13:40:33', '2025-07-21 13:40:33'),
 (15, NULL, 8, 'quand meme', 3, 1, 0, 0, '2025-07-21 13:43:25', '2025-07-21 13:43:25'),
 (16, NULL, 8, 'quand meme', 3, 1, 0, 0, '2025-07-21 13:45:22', '2025-07-21 13:45:22'),
-(19, 2, 7, 'J’aime trop', 5, 1, 0, 0, '2025-07-22 08:09:00', '2025-07-22 08:19:58'),
-(24, NULL, 7, 'j\'aime beaucoup ce livre', 5, 1, 0, 0, '2025-08-03 12:37:53', '2025-08-03 12:37:53'),
 (31, 20, 2, 'j\'aime trop ce livre deja', 5, 1, 0, 0, '2025-08-06 14:30:47', '2025-08-06 14:30:47'),
 (32, 20, 8, 'Trop colle comme livre', 5, 1, 0, 0, '2025-08-08 19:05:16', '2025-08-08 19:05:16');
 
@@ -174,7 +174,8 @@ CREATE TABLE `notes` (
 --
 
 INSERT INTO `notes` (`id`, `user_id`, `book_id`, `page_number`, `note_text`, `created_at`, `updated_at`) VALUES
-(8, 24, 5, 23, 'l\'attachement a Dieu', '2025-09-27 16:30:31', '2025-09-27 16:30:31');
+(8, 24, 5, 23, 'l\'attachement a Dieu', '2025-09-27 16:30:31', '2025-09-27 16:30:31'),
+(9, 2, 8, 55, 'sgffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', '2025-10-01 06:33:37', '2025-10-01 06:33:45');
 
 -- --------------------------------------------------------
 
@@ -196,90 +197,6 @@ CREATE TABLE `reading_history` (
 --
 
 INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_number`, `timestamp`) VALUES
-(22, 2, 5, 'continued', 1, '2025-06-26 18:33:57'),
-(23, 2, 5, 'continued', 2, '2025-06-26 18:34:02'),
-(24, 2, 5, 'continued', 3, '2025-06-26 18:34:05'),
-(25, 2, 4, 'continued', 1, '2025-06-26 18:43:15'),
-(26, 2, 4, 'continued', 2, '2025-06-26 18:43:16'),
-(27, 2, 4, 'continued', 3, '2025-06-26 18:43:19'),
-(28, 2, 4, 'continued', 4, '2025-06-26 18:53:07'),
-(29, 2, 4, 'continued', 5, '2025-06-26 18:53:09'),
-(30, 4, 5, 'continued', 1, '2025-06-26 20:22:55'),
-(31, 4, 5, 'continued', 2, '2025-06-26 20:23:02'),
-(32, 4, 5, 'continued', 3, '2025-06-26 20:23:07'),
-(33, 4, 5, 'continued', 4, '2025-06-26 20:23:17'),
-(34, 3, 5, 'continued', 1, '2025-06-26 20:23:18'),
-(35, 3, 5, 'continued', 2, '2025-06-26 20:23:26'),
-(36, 4, 5, 'continued', 5, '2025-06-26 20:23:30'),
-(37, 4, 5, 'continued', 6, '2025-06-26 20:23:30'),
-(38, 4, 5, 'continued', 7, '2025-06-26 20:23:31'),
-(39, 4, 5, 'continued', 8, '2025-06-26 20:23:31'),
-(40, 4, 5, 'continued', 9, '2025-06-26 20:23:31'),
-(41, 4, 5, 'continued', 10, '2025-06-26 20:23:31'),
-(42, 3, 5, 'continued', 3, '2025-06-26 20:23:31'),
-(43, 4, 5, 'continued', 11, '2025-06-26 20:23:32'),
-(44, 4, 5, 'continued', 12, '2025-06-26 20:23:32'),
-(45, 4, 5, 'continued', 13, '2025-06-26 20:23:32'),
-(46, 4, 5, 'continued', 14, '2025-06-26 20:23:32'),
-(47, 4, 5, 'continued', 15, '2025-06-26 20:23:32'),
-(48, 4, 5, 'continued', 16, '2025-06-26 20:23:32'),
-(49, 4, 5, 'continued', 17, '2025-06-26 20:23:32'),
-(50, 4, 5, 'continued', 18, '2025-06-26 20:23:32'),
-(51, 4, 5, 'continued', 19, '2025-06-26 20:23:32'),
-(52, 4, 5, 'continued', 20, '2025-06-26 20:23:32'),
-(53, 4, 5, 'continued', 21, '2025-06-26 20:23:33'),
-(54, 4, 5, 'continued', 22, '2025-06-26 20:23:33'),
-(55, 3, 5, 'continued', 4, '2025-06-26 20:23:33'),
-(56, 4, 5, 'continued', 23, '2025-06-26 20:23:33'),
-(57, 4, 5, 'continued', 24, '2025-06-26 20:23:33'),
-(58, 4, 5, 'continued', 25, '2025-06-26 20:23:33'),
-(59, 4, 5, 'continued', 26, '2025-06-26 20:23:34'),
-(60, 4, 5, 'continued', 27, '2025-06-26 20:23:34'),
-(61, 4, 5, 'continued', 28, '2025-06-26 20:23:34'),
-(62, 4, 5, 'continued', 29, '2025-06-26 20:23:34'),
-(63, 4, 5, 'continued', 30, '2025-06-26 20:23:34'),
-(64, 4, 5, 'continued', 31, '2025-06-26 20:23:34'),
-(65, 4, 5, 'continued', 32, '2025-06-26 20:23:34'),
-(66, 4, 5, 'continued', 33, '2025-06-26 20:23:34'),
-(67, 4, 5, 'continued', 34, '2025-06-26 20:23:34'),
-(68, 4, 5, 'continued', 35, '2025-06-26 20:23:34'),
-(69, 4, 5, 'continued', 37, '2025-06-26 20:23:34'),
-(70, 4, 5, 'continued', 39, '2025-06-26 20:23:34'),
-(71, 4, 5, 'continued', 42, '2025-06-26 20:23:34'),
-(72, 4, 5, 'continued', 43, '2025-06-26 20:23:34'),
-(73, 4, 5, 'continued', 44, '2025-06-26 20:23:35'),
-(74, 4, 5, 'continued', 45, '2025-06-26 20:23:35'),
-(75, 4, 5, 'continued', 46, '2025-06-26 20:23:35'),
-(76, 4, 5, 'continued', 47, '2025-06-26 20:23:35'),
-(77, 4, 5, 'continued', 48, '2025-06-26 20:23:35'),
-(78, 4, 5, 'continued', 49, '2025-06-26 20:23:35'),
-(79, 4, 5, 'continued', 50, '2025-06-26 20:23:35'),
-(80, 4, 5, 'continued', 51, '2025-06-26 20:23:36'),
-(81, 4, 5, 'continued', 53, '2025-06-26 20:23:36'),
-(82, 4, 5, 'continued', 56, '2025-06-26 20:23:36'),
-(83, 4, 5, 'continued', 57, '2025-06-26 20:23:36'),
-(84, 4, 5, 'continued', 60, '2025-06-26 20:23:36'),
-(85, 4, 5, 'continued', 61, '2025-06-26 20:23:36'),
-(86, 4, 5, 'continued', 62, '2025-06-26 20:23:36'),
-(87, 4, 5, 'continued', 63, '2025-06-26 20:23:36'),
-(88, 4, 5, 'continued', 64, '2025-06-26 20:23:37'),
-(89, 4, 5, 'continued', 65, '2025-06-26 20:23:37'),
-(90, 4, 5, 'continued', 67, '2025-06-26 20:23:37'),
-(91, 4, 5, 'continued', 69, '2025-06-26 20:23:37'),
-(92, 4, 5, 'continued', 66, '2025-06-26 20:23:37'),
-(93, 4, 5, 'continued', 68, '2025-06-26 20:23:37'),
-(94, 4, 5, 'continued', 70, '2025-06-26 20:23:37'),
-(95, 4, 5, 'continued', 71, '2025-06-26 20:23:37'),
-(96, 4, 5, 'continued', 74, '2025-06-26 20:23:38'),
-(97, 4, 5, 'continued', 75, '2025-06-26 20:23:38'),
-(98, 4, 5, 'continued', 76, '2025-06-26 20:23:38'),
-(99, 4, 5, 'continued', 79, '2025-06-26 20:23:38'),
-(100, 4, 5, 'continued', 78, '2025-06-26 20:23:38'),
-(101, 4, 5, 'continued', 81, '2025-06-26 20:23:38'),
-(102, 4, 5, 'continued', 80, '2025-06-26 20:23:38'),
-(103, 4, 5, 'continued', 82, '2025-06-26 20:23:38'),
-(104, 4, 5, 'continued', 83, '2025-06-26 20:23:38'),
-(105, 4, 5, 'continued', 84, '2025-06-26 20:23:39'),
 (106, 4, 5, 'continued', 85, '2025-06-26 20:23:39'),
 (107, 4, 5, 'continued', 87, '2025-06-26 20:23:39'),
 (108, 4, 5, 'continued', 86, '2025-06-26 20:23:39'),
@@ -340,38 +257,6 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (163, 5, 5, 'continued', 7, '2025-06-26 20:31:36'),
 (164, 5, 5, 'continued', 8, '2025-06-26 20:31:37'),
 (165, 5, 5, 'continued', 9, '2025-06-26 20:31:37'),
-(166, 2, 4, 'continued', 6, '2025-06-26 20:37:35'),
-(167, 2, 4, 'continued', 7, '2025-06-26 20:37:39'),
-(168, 2, 4, 'continued', 8, '2025-06-26 20:37:40'),
-(169, 2, 4, 'continued', 9, '2025-06-26 20:38:18'),
-(170, 2, 4, 'continued', 10, '2025-06-26 20:38:18'),
-(171, 2, 4, 'continued', 11, '2025-06-26 20:38:18'),
-(172, 2, 4, 'continued', 12, '2025-06-26 20:38:19'),
-(173, 2, 4, 'continued', 13, '2025-06-26 20:38:37'),
-(174, 2, 4, 'continued', 14, '2025-06-26 20:38:37'),
-(175, 2, 4, 'continued', 15, '2025-06-26 20:38:37'),
-(176, 2, 4, 'continued', 16, '2025-06-26 20:38:37'),
-(177, 2, 4, 'continued', 17, '2025-06-26 20:38:38'),
-(178, 2, 4, 'continued', 18, '2025-06-26 20:39:02'),
-(179, 2, 4, 'continued', 19, '2025-06-26 20:39:05'),
-(180, 2, 4, 'continued', 20, '2025-06-26 20:39:10'),
-(181, 2, 4, 'continued', 21, '2025-06-26 20:39:12'),
-(182, 2, 4, 'continued', 22, '2025-06-26 20:39:37'),
-(183, 2, 4, 'continued', 23, '2025-06-26 20:39:40'),
-(184, 2, 4, 'continued', 24, '2025-06-26 20:39:52'),
-(185, 2, 4, 'continued', 25, '2025-06-26 20:39:58'),
-(186, 2, 4, 'continued', 26, '2025-06-26 20:39:59'),
-(187, 2, 4, 'continued', 27, '2025-06-26 20:40:19'),
-(188, 2, 4, 'continued', 28, '2025-06-26 20:40:33'),
-(189, 2, 4, 'continued', 29, '2025-06-26 20:40:35'),
-(190, 2, 4, 'continued', 30, '2025-06-26 20:40:38'),
-(191, 2, 4, 'continued', 31, '2025-06-26 20:40:39'),
-(192, 2, 4, 'continued', 32, '2025-06-26 20:40:59'),
-(193, 2, 4, 'continued', 33, '2025-06-26 20:41:01'),
-(194, 2, 4, 'continued', 34, '2025-06-26 20:57:21'),
-(195, 2, 4, 'continued', 35, '2025-06-26 20:57:21'),
-(196, 2, 4, 'continued', 36, '2025-06-26 20:57:27'),
-(197, 2, 4, 'continued', 37, '2025-06-26 20:57:51'),
 (198, 2, 5, 'continued', 4, '2025-06-26 20:58:45'),
 (199, 2, 5, 'continued', 5, '2025-06-26 20:58:47'),
 (200, 2, 5, 'continued', 6, '2025-06-26 21:05:14'),
@@ -403,7 +288,6 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (226, 2, 5, 'continued', 32, '2025-06-26 21:42:08'),
 (227, 2, 5, 'continued', 33, '2025-06-26 21:42:46'),
 (228, 2, 5, 'continued', 34, '2025-06-26 21:42:49'),
-(239, 6, 4, 'continued', 1, '2025-06-26 21:58:45'),
 (245, 2, 5, 'continued', 35, '2025-06-26 22:36:58'),
 (251, 2, 5, 'continued', 36, '2025-06-26 23:39:12'),
 (252, 2, 5, 'continued', 37, '2025-06-26 23:39:14'),
@@ -442,9 +326,6 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (285, 7, 5, 'continued', 26, '2025-06-27 00:56:53'),
 (286, 2, 5, 'continued', 45, '2025-06-27 04:21:47'),
 (287, 2, 5, 'continued', 46, '2025-06-27 04:21:48'),
-(291, 2, 4, 'continued', 137, '2025-06-28 15:49:35'),
-(310, 2, 4, 'continued', 138, '2025-06-28 19:35:46'),
-(311, 2, 4, 'continued', 139, '2025-06-28 19:35:47'),
 (334, 2, 5, 'continued', 47, '2025-06-30 07:03:09'),
 (335, 2, 5, 'continued', 48, '2025-06-30 07:32:15'),
 (336, 2, 5, 'continued', 49, '2025-06-30 07:35:50'),
@@ -528,22 +409,6 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (415, 11, 5, 'continued', 5, '2025-07-01 07:50:49'),
 (416, 11, 5, 'continued', 6, '2025-07-01 07:51:43'),
 (418, 11, 5, 'continued', 7, '2025-07-01 07:53:53'),
-(426, 2, 7, 'continued', 1, '2025-07-03 15:21:08'),
-(427, 2, 7, 'continued', 2, '2025-07-03 15:23:34'),
-(428, 2, 7, 'continued', 3, '2025-07-03 15:23:37'),
-(429, 2, 7, 'continued', 4, '2025-07-03 15:23:42'),
-(430, 13, 7, 'continued', 1, '2025-07-03 15:37:35'),
-(431, 2, 7, 'continued', 5, '2025-07-03 15:42:38'),
-(432, 13, 7, 'continued', 2, '2025-07-03 16:10:28'),
-(433, 13, 7, 'continued', 3, '2025-07-03 16:11:47'),
-(434, 2, 7, 'continued', 6, '2025-07-03 16:18:03'),
-(435, 2, 7, 'continued', 7, '2025-07-03 16:18:40'),
-(436, 13, 7, 'continued', 4, '2025-07-03 16:21:55'),
-(437, 2, 7, 'continued', 8, '2025-07-03 16:23:21'),
-(438, 2, 7, 'continued', 9, '2025-07-03 16:26:05'),
-(439, 2, 7, 'continued', 10, '2025-07-03 16:28:30'),
-(440, 2, 7, 'continued', 11, '2025-07-03 16:30:46'),
-(441, 2, 7, 'continued', 12, '2025-07-03 17:31:42'),
 (442, 2, 8, 'continued', 1, '2025-07-04 16:51:52'),
 (443, 2, 8, 'continued', 2, '2025-07-04 16:51:55'),
 (444, 2, 8, 'continued', 3, '2025-07-04 16:51:57'),
@@ -590,19 +455,12 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (487, 2, 8, 'continued', 43, '2025-07-18 17:33:49'),
 (488, 2, 8, 'continued', 44, '2025-07-18 17:35:46'),
 (489, 2, 8, 'continued', 45, '2025-07-18 17:35:46'),
-(490, 2, 7, 'continued', 13, '2025-07-18 18:01:56'),
-(491, 2, 7, 'continued', 14, '2025-07-18 18:01:56'),
-(492, 14, 7, 'continued', 1, '2025-07-20 20:12:39'),
-(493, 14, 7, 'continued', 2, '2025-07-20 20:12:51'),
-(494, 14, 7, 'continued', 3, '2025-07-20 20:12:53'),
-(495, 14, 7, 'continued', 4, '2025-07-20 20:12:53'),
 (496, 14, 5, 'continued', 1, '2025-07-20 20:29:48'),
 (497, 14, 5, 'continued', 2, '2025-07-20 20:29:50'),
 (498, 14, 5, 'continued', 3, '2025-07-20 20:29:50'),
 (499, 14, 5, 'continued', 4, '2025-07-20 20:29:50'),
 (500, 14, 5, 'continued', 5, '2025-07-20 20:29:51'),
 (501, 14, 5, 'continued', 6, '2025-07-20 20:29:51'),
-(502, 14, 4, 'continued', 1, '2025-07-20 20:38:06'),
 (503, 14, 2, 'continued', 1, '2025-07-21 05:55:32'),
 (504, 14, 2, 'continued', 2, '2025-07-21 05:55:38'),
 (505, 14, 2, 'continued', 3, '2025-07-21 05:55:39'),
@@ -618,15 +476,6 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (515, 14, 5, 'continued', 14, '2025-07-21 06:02:18'),
 (516, 14, 5, 'continued', 15, '2025-07-21 06:02:18'),
 (517, 14, 5, 'continued', 16, '2025-07-21 06:02:18'),
-(518, 2, 7, 'continued', 15, '2025-07-22 13:02:57'),
-(519, 2, 7, 'continued', 16, '2025-07-22 13:02:57'),
-(520, 2, 7, 'continued', 17, '2025-07-22 13:02:57'),
-(521, 2, 7, 'continued', 18, '2025-07-22 13:02:57'),
-(522, 2, 7, 'continued', 19, '2025-07-22 13:02:58'),
-(523, 2, 7, 'continued', 20, '2025-07-23 10:06:45'),
-(524, 19, 7, 'continued', 1, '2025-08-03 08:37:56'),
-(525, 19, 7, 'continued', 2, '2025-08-03 08:42:11'),
-(526, 19, 7, 'continued', 3, '2025-08-03 08:42:12'),
 (527, 20, 5, 'continued', 1, '2025-08-03 13:20:31'),
 (528, 20, 5, 'continued', 2, '2025-08-03 13:20:33'),
 (529, 20, 5, 'continued', 3, '2025-08-03 13:20:35'),
@@ -701,13 +550,6 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (598, 20, 5, 'continued', 73, '2025-08-03 16:28:34'),
 (599, 20, 5, 'continued', 74, '2025-08-03 16:30:10'),
 (600, 20, 5, 'continued', 75, '2025-08-03 16:32:01'),
-(601, 20, 4, 'continued', 1, '2025-08-03 16:33:42'),
-(602, 20, 4, 'continued', 2, '2025-08-03 16:33:44'),
-(603, 20, 4, 'continued', 3, '2025-08-03 16:33:45'),
-(604, 20, 4, 'continued', 4, '2025-08-03 16:33:46'),
-(605, 20, 4, 'continued', 5, '2025-08-03 16:33:47'),
-(606, 20, 4, 'continued', 6, '2025-08-03 16:37:43'),
-(607, 20, 4, 'continued', 7, '2025-08-03 17:11:57'),
 (608, 20, 5, 'continued', 76, '2025-08-03 21:51:35'),
 (609, 20, 5, 'continued', 77, '2025-08-03 21:55:29'),
 (610, 20, 5, 'continued', 78, '2025-08-03 21:55:29'),
@@ -733,9 +575,6 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (630, 20, 5, 'continued', 98, '2025-08-05 10:12:59'),
 (631, 20, 5, 'continued', 101, '2025-08-05 10:12:59'),
 (632, 20, 5, 'continued', 102, '2025-08-05 10:13:13'),
-(633, 20, 4, 'continued', 8, '2025-08-05 10:30:40'),
-(634, 20, 4, 'continued', 9, '2025-08-05 10:30:45'),
-(635, 20, 4, 'continued', 10, '2025-08-05 10:32:30'),
 (636, 20, 5, 'continued', 103, '2025-08-05 10:37:45'),
 (637, 20, 5, 'continued', 104, '2025-08-05 10:52:51'),
 (638, 20, 5, 'continued', 105, '2025-08-05 10:52:51'),
@@ -777,34 +616,6 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (674, 20, 5, 'continued', 141, '2025-08-05 11:24:41'),
 (675, 20, 5, 'continued', 142, '2025-08-05 11:24:42'),
 (676, 20, 5, 'continued', 143, '2025-08-05 11:24:42'),
-(677, 20, 4, 'continued', 11, '2025-08-05 11:27:59'),
-(678, 20, 4, 'continued', 12, '2025-08-05 11:28:00'),
-(679, 20, 4, 'continued', 13, '2025-08-05 11:28:00'),
-(680, 20, 4, 'continued', 14, '2025-08-05 11:28:01'),
-(681, 20, 4, 'continued', 15, '2025-08-05 11:28:02'),
-(682, 20, 4, 'continued', 16, '2025-08-05 11:28:03'),
-(683, 20, 4, 'continued', 17, '2025-08-05 11:28:03'),
-(684, 20, 4, 'continued', 18, '2025-08-05 11:28:04'),
-(685, 20, 4, 'continued', 19, '2025-08-05 11:28:05'),
-(686, 20, 4, 'continued', 20, '2025-08-05 11:28:06'),
-(687, 20, 4, 'continued', 21, '2025-08-05 11:28:07'),
-(688, 20, 4, 'continued', 22, '2025-08-05 11:28:07'),
-(689, 20, 4, 'continued', 23, '2025-08-05 11:28:08'),
-(690, 20, 4, 'continued', 24, '2025-08-05 11:28:09'),
-(691, 20, 4, 'continued', 25, '2025-08-05 11:28:10'),
-(692, 20, 4, 'continued', 26, '2025-08-05 11:28:10'),
-(693, 20, 4, 'continued', 27, '2025-08-05 11:28:11'),
-(694, 20, 4, 'continued', 28, '2025-08-05 11:28:12'),
-(695, 20, 4, 'continued', 29, '2025-08-05 11:28:12'),
-(696, 20, 4, 'continued', 30, '2025-08-05 11:28:13'),
-(697, 20, 4, 'continued', 31, '2025-08-05 11:28:14'),
-(698, 20, 4, 'continued', 32, '2025-08-05 11:28:14'),
-(699, 20, 4, 'continued', 33, '2025-08-05 11:50:50'),
-(700, 20, 4, 'continued', 34, '2025-08-05 11:50:50'),
-(701, 20, 4, 'continued', 35, '2025-08-05 11:50:51'),
-(702, 20, 4, 'continued', 36, '2025-08-05 11:50:51'),
-(703, 20, 4, 'continued', 37, '2025-08-05 11:50:52'),
-(704, 20, 4, 'continued', 38, '2025-08-05 11:50:52'),
 (742, 20, 2, 'continued', 1, '2025-08-06 14:30:15'),
 (743, 20, 2, 'continued', 2, '2025-08-06 14:30:17'),
 (744, 20, 2, 'continued', 3, '2025-08-06 14:30:17'),
@@ -876,25 +687,134 @@ INSERT INTO `reading_history` (`id`, `user_id`, `book_id`, `action`, `page_numbe
 (810, 24, 5, 'continued', 28, '2025-09-27 16:39:04'),
 (811, 24, 5, 'continued', 29, '2025-09-27 16:39:59'),
 (812, 24, 5, 'continued', 30, '2025-09-27 16:40:54'),
-(813, 24, 5, 'continued', 31, '2025-09-27 16:41:50');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `reading_sessions`
---
-
-CREATE TABLE `reading_sessions` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `book_id` int(11) DEFAULT NULL,
-  `start_time` datetime NOT NULL,
-  `end_time` datetime DEFAULT NULL,
-  `start_page` int(11) DEFAULT NULL,
-  `end_page` int(11) DEFAULT NULL,
-  `duration_minutes` int(11) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(813, 24, 5, 'continued', 31, '2025-09-27 16:41:50'),
+(814, 2, 5, 'continued', 144, '2025-09-28 06:45:49'),
+(815, 2, 5, 'continued', 143, '2025-09-28 06:59:54'),
+(816, 2, 5, 'continued', 142, '2025-09-28 06:59:55'),
+(817, 2, 5, 'continued', 141, '2025-09-28 06:59:55'),
+(818, 2, 5, 'continued', 140, '2025-09-28 06:59:56'),
+(819, 2, 5, 'continued', 139, '2025-09-28 06:59:56'),
+(820, 2, 5, 'continued', 138, '2025-09-28 06:59:56'),
+(821, 2, 5, 'continued', 137, '2025-09-28 06:59:56'),
+(822, 2, 5, 'continued', 136, '2025-09-28 06:59:56'),
+(823, 2, 5, 'continued', 135, '2025-09-28 06:59:57'),
+(824, 2, 5, 'continued', 134, '2025-09-28 06:59:57'),
+(825, 2, 5, 'continued', 133, '2025-09-28 06:59:57'),
+(826, 2, 5, 'continued', 132, '2025-09-28 06:59:57'),
+(827, 2, 5, 'continued', 131, '2025-09-28 06:59:59'),
+(828, 2, 5, 'continued', 130, '2025-09-28 07:00:00'),
+(829, 2, 5, 'continued', 129, '2025-09-28 07:00:01'),
+(830, 24, 5, 'continued', 32, '2025-09-28 08:56:34'),
+(831, 24, 5, 'continued', 33, '2025-09-28 08:56:35'),
+(832, 24, 5, 'continued', 34, '2025-09-28 08:56:35'),
+(833, 24, 5, 'continued', 35, '2025-09-28 08:56:36'),
+(834, 24, 5, 'continued', 36, '2025-09-28 08:56:36'),
+(835, 24, 5, 'continued', 37, '2025-09-28 08:56:37'),
+(836, 24, 5, 'continued', 38, '2025-09-28 08:56:40'),
+(837, 24, 5, 'continued', 39, '2025-09-28 08:56:40'),
+(838, 24, 5, 'continued', 40, '2025-09-28 08:56:40'),
+(839, 24, 5, 'continued', 41, '2025-09-28 08:56:41'),
+(840, 24, 2, 'continued', 1, '2025-09-28 08:59:55'),
+(841, 24, 2, 'continued', 2, '2025-09-28 08:59:57'),
+(842, 24, 2, 'continued', 3, '2025-09-28 08:59:58'),
+(843, 24, 2, 'continued', 4, '2025-09-28 08:59:59'),
+(844, 24, 2, 'continued', 5, '2025-09-28 09:00:00'),
+(845, 24, 2, 'continued', 6, '2025-09-28 09:04:28'),
+(846, 24, 2, 'continued', 7, '2025-09-28 09:06:18'),
+(847, 2, 5, 'continued', 1, '2025-09-28 11:43:42'),
+(848, 2, 5, 'continued', 2, '2025-09-28 11:43:43'),
+(849, 2, 5, 'continued', 3, '2025-09-28 11:43:44'),
+(850, 2, 5, 'continued', 95, '2025-09-28 18:45:47'),
+(851, 2, 5, 'continued', 96, '2025-09-28 18:47:48'),
+(852, 2, 5, 'continued', 97, '2025-09-28 18:49:34'),
+(853, 2, 5, 'continued', 98, '2025-09-28 18:52:11'),
+(854, 2, 5, 'continued', 99, '2025-09-28 18:54:28'),
+(855, 2, 5, 'continued', 102, '2025-09-28 18:59:25'),
+(856, 2, 5, 'continued', 106, '2025-09-28 19:08:06'),
+(857, 2, 5, 'continued', 107, '2025-09-28 19:09:49'),
+(858, 2, 5, 'continued', 108, '2025-09-28 19:12:59'),
+(859, 2, 5, 'continued', 109, '2025-09-28 19:16:17'),
+(860, 2, 5, 'continued', 110, '2025-09-28 19:18:09'),
+(861, 2, 5, 'continued', 111, '2025-09-28 19:18:14'),
+(862, 2, 5, 'continued', 112, '2025-09-28 19:19:50'),
+(863, 2, 5, 'continued', 113, '2025-09-28 19:21:44'),
+(864, 2, 5, 'continued', 114, '2025-09-28 19:22:51'),
+(865, 2, 5, 'continued', 115, '2025-09-28 19:24:45'),
+(866, 2, 5, 'continued', 116, '2025-09-28 19:25:43'),
+(867, 2, 5, 'continued', 118, '2025-09-28 19:28:39'),
+(868, 2, 5, 'continued', 119, '2025-09-28 19:30:47'),
+(869, 2, 8, 'continued', 47, '2025-09-28 19:45:24'),
+(870, 2, 8, 'continued', 48, '2025-09-28 19:46:59'),
+(871, 2, 8, 'continued', 49, '2025-09-28 19:49:11'),
+(872, 2, 8, 'continued', 50, '2025-09-28 19:50:27'),
+(873, 2, 8, 'continued', 51, '2025-09-28 22:17:14'),
+(874, 2, 8, 'continued', 52, '2025-09-28 22:17:19'),
+(875, 26, 8, 'continued', 1, '2025-09-28 22:19:32'),
+(876, 26, 8, 'continued', 2, '2025-09-28 22:19:37'),
+(877, 26, 8, 'continued', 3, '2025-09-28 22:19:38'),
+(878, 26, 8, 'continued', 4, '2025-09-28 22:19:39'),
+(879, 26, 8, 'continued', 5, '2025-09-28 22:19:40'),
+(880, 26, 8, 'continued', 6, '2025-09-28 22:19:49'),
+(881, 26, 8, 'continued', 7, '2025-09-28 22:20:15'),
+(882, 26, 8, 'continued', 8, '2025-09-28 22:25:12'),
+(883, 26, 8, 'continued', 9, '2025-09-28 22:25:18'),
+(884, 26, 8, 'continued', 10, '2025-09-28 22:25:19'),
+(885, 26, 8, 'continued', 11, '2025-09-28 22:25:24'),
+(886, 26, 8, 'continued', 12, '2025-09-28 22:25:25'),
+(887, 26, 8, 'continued', 13, '2025-09-28 22:25:26'),
+(888, 26, 8, 'continued', 14, '2025-09-28 22:25:27'),
+(889, 26, 8, 'continued', 15, '2025-09-28 22:25:27'),
+(890, 26, 8, 'continued', 16, '2025-09-28 22:25:27'),
+(891, 26, 8, 'continued', 17, '2025-09-28 22:25:44'),
+(892, 26, 8, 'continued', 18, '2025-09-28 22:25:45'),
+(893, 26, 8, 'continued', 19, '2025-09-28 22:25:45'),
+(894, 26, 8, 'continued', 20, '2025-09-28 22:25:45'),
+(895, 26, 8, 'continued', 21, '2025-09-28 22:25:45'),
+(896, 26, 8, 'continued', 22, '2025-09-28 22:25:45'),
+(897, 26, 8, 'continued', 23, '2025-09-28 22:25:46'),
+(898, 26, 8, 'continued', 24, '2025-09-28 22:25:46'),
+(899, 26, 8, 'continued', 25, '2025-09-28 22:25:46'),
+(900, 26, 8, 'continued', 26, '2025-09-28 22:25:46'),
+(901, 26, 8, 'continued', 27, '2025-09-28 22:25:46'),
+(902, 26, 8, 'continued', 28, '2025-09-28 22:25:46'),
+(903, 26, 8, 'continued', 29, '2025-09-28 22:25:47'),
+(904, 26, 8, 'continued', 30, '2025-09-28 22:25:47'),
+(905, 26, 8, 'continued', 31, '2025-09-28 22:25:47'),
+(906, 26, 8, 'continued', 32, '2025-09-28 22:25:47'),
+(907, 26, 8, 'continued', 33, '2025-09-28 22:25:47'),
+(908, 26, 8, 'continued', 34, '2025-09-28 22:25:47'),
+(909, 26, 8, 'continued', 35, '2025-09-28 22:25:48'),
+(910, 26, 8, 'continued', 36, '2025-09-28 22:25:48'),
+(911, 26, 8, 'continued', 37, '2025-09-28 22:25:48'),
+(912, 26, 8, 'continued', 38, '2025-09-28 22:25:48'),
+(913, 26, 8, 'continued', 39, '2025-09-28 22:25:48'),
+(914, 26, 8, 'continued', 40, '2025-09-28 22:25:49'),
+(915, 26, 8, 'continued', 41, '2025-09-28 22:25:49'),
+(916, 2, 5, 'continued', 117, '2025-09-28 22:25:51'),
+(917, 26, 8, 'continued', 42, '2025-09-28 22:25:51'),
+(918, 26, 8, 'continued', 43, '2025-09-28 22:25:51'),
+(919, 26, 8, 'continued', 44, '2025-09-28 22:25:55'),
+(920, 26, 8, 'continued', 45, '2025-09-28 22:25:56'),
+(921, 26, 8, 'continued', 46, '2025-09-28 22:25:56'),
+(922, 26, 8, 'continued', 47, '2025-09-28 22:25:56'),
+(923, 26, 8, 'continued', 48, '2025-09-28 22:25:56'),
+(924, 26, 8, 'continued', 49, '2025-09-28 22:25:57'),
+(925, 26, 8, 'continued', 50, '2025-09-28 22:25:57'),
+(926, 26, 8, 'continued', 51, '2025-09-28 22:25:58'),
+(927, 26, 8, 'continued', 52, '2025-09-28 22:25:59'),
+(928, 26, 8, 'continued', 53, '2025-09-28 22:26:00'),
+(929, 2, 8, 'continued', 53, '2025-09-30 14:26:24'),
+(930, 2, 8, 'continued', 54, '2025-09-30 14:26:25'),
+(931, 2, 8, 'continued', 55, '2025-09-30 16:52:22'),
+(932, 2, 8, 'continued', 56, '2025-10-01 08:10:06'),
+(933, 2, 8, 'continued', 57, '2025-10-01 08:10:07'),
+(934, 2, 8, 'continued', 58, '2025-10-01 08:10:08'),
+(935, 2, 8, 'continued', 59, '2025-10-01 08:10:08'),
+(936, 2, 8, 'continued', 60, '2025-10-01 08:10:09'),
+(937, 2, 8, 'continued', 61, '2025-10-01 08:10:10'),
+(938, 2, 8, 'continued', 62, '2025-10-01 08:10:10'),
+(939, 2, 8, 'continued', 63, '2025-10-01 08:10:11'),
+(940, 2, 8, 'continued', 64, '2025-10-01 08:10:12');
 
 -- --------------------------------------------------------
 
@@ -926,10 +846,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `email`, `first_name`, `last_name`, `profile_picture`, `role`, `is_active`, `email_verified_at`, `email_verification_token`, `password_reset_token`, `password_reset_expires`, `last_login`, `created_at`, `updated_at`) VALUES
-(2, 'Christian', '$2y$10$B2xqYopDTgpFXQCuiZPkwesG94PmhDf4R1quESCVxWKKl4.EwrMQ2', 'ondiyochristian10@gmail.com', 'CHRISTIAN', 'ONDIYO', '../assets/uploads/profiles/2_1758893615.jpg', 'admin', 1, '2025-08-02 20:58:02', NULL, NULL, NULL, '2025-09-27 18:47:30', '2025-04-30 20:03:54', '2025-09-27 16:47:30'),
+(2, 'Christian', '$2y$10$B2xqYopDTgpFXQCuiZPkwesG94PmhDf4R1quESCVxWKKl4.EwrMQ2', 'ondiyochristian10@gmail.com', 'CHRISTIAN', 'ONDIYO', '../assets/uploads/profiles/2_1758893615.jpg', 'admin', 1, '2025-08-02 20:58:02', NULL, NULL, NULL, '2025-10-01 17:20:05', '2025-04-30 20:03:54', '2025-10-01 15:20:05'),
 (20, 'Christianstark', '$2y$10$94fVqH402GKTu/hBLgn7NeZXz7p9GhIusomec8voNUO3zQY.S/nSK', 'christianondiyo78@gmail.com', 'CHRISTIAN', 'ONDIYO', '../assets/uploads/profiles/20_1754394741.jpg', 'user', 1, '2025-08-03 14:59:31', NULL, NULL, NULL, '2025-09-11 09:21:05', '2025-08-03 12:58:47', '2025-09-11 07:21:05'),
-(24, 'Christi', '$2y$10$C2bjzqsD3ME.8egb0qroduiJFQOZDIYqlPyueiPW8UzBUpwXbNVQu', 'ondiyochristian12@gmail.com', 'hello', 'parfait', '../assets/uploads/profiles/24_1758991539.png', 'user', 1, '2025-09-27 10:56:02', NULL, NULL, NULL, '2025-09-27 17:50:56', '2025-09-27 08:55:28', '2025-09-27 16:45:39'),
-(25, 'abigaelmak@yahoo.com', '$2y$10$UnT8dgDARKE1i6XO4s8e/e1pliIFTSqO8y8X3WbRfjwfCE0nn6/PS', 'abigaelmak@yahoo.com', 'Abigaëlle', 'Makandu', '../assets/uploads/profiles/25_1758964220.jpeg', 'user', 1, '2025-09-27 10:57:22', NULL, NULL, NULL, '2025-09-27 10:57:28', '2025-09-27 08:56:24', '2025-09-27 09:10:20');
+(24, 'Christi', '$2y$10$C2bjzqsD3ME.8egb0qroduiJFQOZDIYqlPyueiPW8UzBUpwXbNVQu', 'ondiyochristian12@gmail.com', 'hello', 'parfait', '../assets/uploads/profiles/24_1758991539.png', 'user', 1, '2025-09-27 10:56:02', NULL, NULL, NULL, '2025-10-01 17:19:28', '2025-09-27 08:55:28', '2025-10-01 15:19:28'),
+(25, 'abigaelmak@yahoo.com', '$2y$10$UnT8dgDARKE1i6XO4s8e/e1pliIFTSqO8y8X3WbRfjwfCE0nn6/PS', 'abigaelmak@yahoo.com', 'Abigaëlle', 'Makandu', '../assets/uploads/profiles/25_1758964220.jpeg', 'user', 1, '2025-09-27 10:57:22', NULL, NULL, NULL, '2025-09-27 10:57:28', '2025-09-27 08:56:24', '2025-09-27 09:10:20'),
+(26, 'mariensimba', '$2y$10$aQijZjslO.aFiTx0uuulq.cHD86Gci8MBt.lJybmjzJIKP1W8UUGe', 'mariensimba@outlook.be', 'Marie', 'Nsimba', NULL, 'user', 1, '2025-09-29 00:17:12', NULL, NULL, NULL, '2025-09-29 00:30:33', '2025-09-28 22:10:31', '2025-09-28 22:30:33');
 
 -- --------------------------------------------------------
 
@@ -952,30 +873,23 @@ CREATE TABLE `user_library` (
 
 INSERT INTO `user_library` (`user_id`, `book_id`, `last_page_read`, `is_favorite`, `added_at`, `last_read_at`) VALUES
 (2, 2, 4, 0, '2025-08-09 14:48:32', '2025-09-27 16:48:56'),
-(2, 5, 14, 0, '2025-09-14 18:47:00', '2025-09-27 09:33:30'),
-(2, 7, 20, 0, '2025-07-03 15:20:56', '2025-09-10 17:38:32'),
-(2, 8, 15, 0, '2025-09-08 12:39:09', '2025-09-27 17:02:27'),
+(2, 8, 63, 0, '2025-09-08 12:39:09', '2025-10-01 08:10:13'),
 (3, 5, 10, 0, '2025-06-26 20:23:16', '2025-06-26 20:24:43'),
 (4, 5, 144, 0, '2025-06-26 20:22:41', '2025-06-26 20:23:52'),
 (5, 5, 9, 0, '2025-06-26 20:31:07', '2025-06-26 20:31:41'),
-(6, 4, 1, 0, '2025-06-26 21:58:42', '2025-06-26 21:58:45'),
 (7, 5, 25, 0, '2025-06-26 23:53:40', '2025-06-27 01:01:36'),
 (9, 5, 4, 0, '2025-06-30 12:28:17', '2025-06-30 12:40:21'),
 (10, 5, 23, 0, '2025-06-30 16:34:56', '2025-06-30 16:56:07'),
 (11, 5, 7, 0, '2025-07-01 07:47:54', '2025-07-01 07:53:53'),
-(13, 7, 4, 0, '2025-07-03 15:37:33', '2025-07-03 16:21:55'),
 (14, 2, 5, 1, '2025-07-20 20:43:33', '2025-07-21 05:55:45'),
 (14, 5, 16, 0, '2025-07-20 20:29:47', '2025-07-21 06:02:18'),
-(14, 7, 4, 1, '2025-07-20 20:12:39', '2025-07-21 11:27:11'),
-(19, 7, 3, 0, '2025-08-03 08:37:34', '2025-08-03 09:10:28'),
 (20, 2, 17, 0, '2025-08-06 14:28:48', '2025-08-08 18:53:10'),
-(20, 4, 38, 1, '2025-08-03 16:33:34', '2025-08-05 12:10:14'),
 (20, 5, 144, 1, '2025-08-03 13:20:20', '2025-08-05 16:26:40'),
 (20, 8, 4, 0, '2025-08-08 19:04:14', '2025-08-08 19:05:18'),
-(24, 2, 1, 0, '2025-09-27 16:46:13', NULL),
-(24, 5, 31, 1, '2025-09-27 08:58:10', '2025-09-27 16:41:50'),
-(24, 7, 1, 0, '2025-09-27 16:20:32', NULL),
-(25, 8, 8, 0, '2025-09-27 09:00:18', '2025-09-27 09:05:24');
+(24, 2, 7, 0, '2025-09-27 16:46:13', '2025-09-28 09:06:18'),
+(24, 5, 41, 1, '2025-09-27 08:58:10', '2025-09-28 08:56:41'),
+(25, 8, 8, 0, '2025-09-27 09:00:18', '2025-09-27 09:05:24'),
+(26, 8, 53, 0, '2025-09-28 22:19:31', '2025-09-28 22:30:57');
 
 --
 -- Index pour les tables déchargées
@@ -1006,8 +920,7 @@ ALTER TABLE `book_categories`
 -- Index pour la table `categories`
 --
 ALTER TABLE `categories`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `parent_id` (`parent_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Index pour la table `comments`
@@ -1029,14 +942,6 @@ ALTER TABLE `notes`
 -- Index pour la table `reading_history`
 --
 ALTER TABLE `reading_history`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `book_id` (`book_id`);
-
---
--- Index pour la table `reading_sessions`
---
-ALTER TABLE `reading_sessions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`),
   ADD KEY `book_id` (`book_id`);
@@ -1087,25 +992,19 @@ ALTER TABLE `comments`
 -- AUTO_INCREMENT pour la table `notes`
 --
 ALTER TABLE `notes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT pour la table `reading_history`
 --
 ALTER TABLE `reading_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=814;
-
---
--- AUTO_INCREMENT pour la table `reading_sessions`
---
-ALTER TABLE `reading_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=941;
 
 --
 -- AUTO_INCREMENT pour la table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- Contraintes pour les tables déchargées
@@ -1126,12 +1025,6 @@ ALTER TABLE `book_categories`
   ADD CONSTRAINT `book_categories_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE CASCADE;
 
 --
--- Contraintes pour la table `categories`
---
-ALTER TABLE `categories`
-  ADD CONSTRAINT `categories_ibfk_1` FOREIGN KEY (`parent_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL;
-
---
 -- Contraintes pour la table `comments`
 --
 ALTER TABLE `comments`
@@ -1144,13 +1037,6 @@ ALTER TABLE `comments`
 ALTER TABLE `notes`
   ADD CONSTRAINT `notes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `notes_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE;
-
---
--- Contraintes pour la table `reading_sessions`
---
-ALTER TABLE `reading_sessions`
-  ADD CONSTRAINT `reading_sessions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `reading_sessions_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
