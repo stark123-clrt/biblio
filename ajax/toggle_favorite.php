@@ -26,7 +26,9 @@ if ($book_id <= 0) {
     exit;
 }
 
-require_once "../config/database.php";
+require_once "../classes/Core.php";
+$conn = getDatabase();
+
 
 try {
     // Vérifier si le livre est dans la bibliothèque de l'utilisateur

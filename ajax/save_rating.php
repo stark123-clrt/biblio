@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once "../config/database.php";
+require_once "../classes/Core.php";
+$conn = getDatabase();
 
 // Nettoyer tout buffer de sortie existant pour éviter les caractères invisibles
 while (ob_get_level()) {

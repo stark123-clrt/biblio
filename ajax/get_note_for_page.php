@@ -1,6 +1,8 @@
 <?php
 session_start();
-require_once "../config/database.php";
+
+require_once "../classes/Core.php";
+$conn = getDatabase();
 
 header('Content-Type: application/json');
 ini_set('display_errors', 0);
