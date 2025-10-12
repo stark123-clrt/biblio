@@ -1,6 +1,9 @@
 <?php
 session_start();
-require_once "../config/database.php";
+
+require_once "../classes/Core.php";
+$conn = getDatabase();
+
 
 // Définir l'en-tête pour indiquer que la réponse est du JSON
 header('Content-Type: application/json');

@@ -28,7 +28,9 @@ if ($comment_id <= 0 || $book_id <= 0 || $rating < 1 || $rating > 5 || empty($co
     exit;
 }
 
-require_once "../config/database.php";
+require_once "../classes/Core.php";
+$conn = getDatabase();
+
 
 try {
     // Vérifier si le commentaire existe et appartient à l'utilisateur

@@ -1,7 +1,10 @@
 <?php
 // ajax/remove_from_library.php - Script pour supprimer un livre de la bibliothèque de l'utilisateur
 session_start();
-require_once "../config/database.php";
+
+require_once "../classes/Core.php";
+$conn = getDatabase();
+
 
 // Nettoyage du buffer de sortie pour éviter les caractères invisibles
 while (ob_get_level()) {

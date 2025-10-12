@@ -26,7 +26,9 @@ if ($note_id <= 0 || empty($note_text)) {
     exit;
 }
 
-require_once "../config/database.php";
+require_once "../classes/Core.php";
+$conn = getDatabase();
+
 
 try {
     // Vérifier si la note existe et appartient à l'utilisateur

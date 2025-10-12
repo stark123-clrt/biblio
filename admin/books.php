@@ -71,10 +71,6 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
             $stmt->bindParam(':book_id', $book_id, PDO::PARAM_INT);
             $stmt->execute();
             
-            // Supprimer les sessions de lecture et l'historique
-            $stmt = $conn->prepare("DELETE FROM reading_sessions WHERE book_id = :book_id");
-            $stmt->bindParam(':book_id', $book_id, PDO::PARAM_INT);
-            $stmt->execute();
             
             $stmt = $conn->prepare("DELETE FROM reading_history WHERE book_id = :book_id");
             $stmt->bindParam(':book_id', $book_id, PDO::PARAM_INT);

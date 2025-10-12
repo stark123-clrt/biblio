@@ -1,7 +1,11 @@
 <?php
 // Assurez-vous qu'il n'y a aucun espace ou saut de ligne avant <?php
 session_start();
-require_once "../config/database.php";
+
+
+require_once "../classes/Core.php";
+$conn = getDatabase();
+
 
 // Nettoyage complet du tampon de sortie
 while (ob_get_level()) {
