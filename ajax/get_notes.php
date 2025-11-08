@@ -8,15 +8,26 @@ $conn = getDatabase();
 
 header('Content-Type: application/json');
 
+
+
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Non authentifié']);
     exit;
 }
 
+
 if (!isset($_GET['book_id'])) {
     echo json_encode(['success' => false, 'message' => 'ID du livre manquant']);
     exit;
 }
+
+
+
+// $statut = $conn->prepare("SET NAMES 'utf8mb4'");
+// $statut->execute(); 
+// parameter("utf8mb4_unicode_ci");
+
+
 
 $book_id = (int)$_GET['book_id'];
 $user_id = $_SESSION['user_id'];
@@ -35,3 +46,8 @@ try {
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => 'Erreur: ' . $e->getMessage()]);
 }
+
+
+
+
+

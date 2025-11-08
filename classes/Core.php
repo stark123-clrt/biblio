@@ -340,3 +340,217 @@ function config(string $key, $default = null)
 {
     return Config::getInstance()->get($key, $default);
 }
+
+
+function timeAgo($datetime) {
+    if (empty($datetime)) {
+        return 'Date inconnue';
+    }
+    
+    $timestamp = strtotime($datetime);
+    $current_time = time();
+    $difference = $current_time - $timestamp;
+    
+    // Secondes
+    if ($difference < 60) {
+        return 'à l\'instant';
+    }
+    
+    // Minutes
+    if ($difference < 3600) {
+        $minutes = floor($difference / 60);
+        return 'il y a ' . $minutes . ' minute' . ($minutes > 1 ? 's' : '');
+    }
+    
+    // Heures
+    if ($difference < 86400) {
+        $hours = floor($difference / 3600);
+        return 'il y a ' . $hours . ' heure' . ($hours > 1 ? 's' : '');
+    }
+    
+    // Jours
+    if ($difference < 604800) {
+        $days = floor($difference / 86400);
+        return 'il y a ' . $days . ' jour' . ($days > 1 ? 's' : '');
+    }
+    
+    // Semaines
+    if ($difference < 2592000) {
+        $weeks = floor($difference / 604800);
+        return 'il y a ' . $weeks . ' semaine' . ($weeks > 1 ? 's' : '');
+    }
+    
+    // Mois
+    if ($difference < 31536000) {
+        $months = floor($difference / 2592000);
+        return 'il y a ' . $months . ' mois';
+    }
+    
+    // Années
+    $years = floor($difference / 31536000);
+    return 'il y a ' . $years . ' an' . ($years > 1 ? 's' : '');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function getInitials($user): string {
+    // Si c'est un objet User
+    if (is_object($user)) {
+        $firstName = $user->first_name ?? $user->getFirstName() ?? '';
+        $lastName = $user->last_name ?? $user->getLastName() ?? '';
+        $username = $user->username ?? $user->getUsername() ?? 'U';
+    } 
+    // Si c'est un tableau
+    else if (is_array($user)) {
+        $firstName = $user['first_name'] ?? '';
+        $lastName = $user['last_name'] ?? '';
+        $username = $user['username'] ?? 'U';
+    }
+    else {
+        return 'U';
+    }
+    
+    // Si on a un prénom, prendre les 2 premières lettres
+    if (!empty($firstName)) {
+        return strtoupper(mb_substr($firstName, 0, 2, 'UTF-8'));
+    }
+    
+    // Sinon, prendre la première lettre du prénom et du nom
+    if (!empty($firstName) && !empty($lastName)) {
+        return strtoupper(mb_substr($firstName, 0, 1, 'UTF-8') . mb_substr($lastName, 0, 1, 'UTF-8'));
+    }
+    
+    // Sinon, prendre les 2 premières lettres du username
+    if (!empty($username)) {
+        return strtoupper(mb_substr($username, 0, 2, 'UTF-8'));
+    }
+    
+    return 'U';
+}
+
+/**
+ * Génère une couleur d'avatar basée sur le nom (pour avoir des couleurs cohérentes)
+ * @param string $name Nom de l'utilisateur
+ * @return string Code couleur hexadécimal
+ */
+function getAvatarColor(string $name): string {
+    $colors = [
+        '#3b82f6', // Bleu
+        '#8b5cf6', // Violet
+        '#ec4899', // Rose
+        '#f59e0b', // Orange
+        '#10b981', // Vert
+        '#06b6d4', // Cyan
+        '#6366f1', // Indigo
+        '#f97316', // Orange foncé
+        '#14b8a6', // Teal
+        '#a855f7', // Violet clair
+        '#ef4444', // Rouge
+        '#84cc16', // Vert lime
+    ];
+    
+    // Utiliser le hash du nom pour choisir une couleur de manière cohérente
+    $hash = crc32($name);
+    $index = abs($hash) % count($colors);
+    
+    return $colors[$index];
+}
+
+/**
+ * Affiche un avatar avec initiales
+ * @param User|array $user Objet User ou tableau avec les données utilisateur
+ * @param string $size Taille CSS (ex: 'w-10 h-10', 'w-16 h-16')
+ * @param string $textSize Taille du texte CSS (ex: 'text-sm', 'text-lg')
+ * @return string Code HTML de l'avatar
+ */
+function renderAvatar($user, string $size = 'w-10 h-10', string $textSize = 'text-sm'): string {
+    $initials = getInitials($user);
+    
+    // Obtenir le nom pour la couleur
+    $name = '';
+    if (is_object($user)) {
+        $name = $user->username ?? $user->getUsername() ?? '';
+    } else if (is_array($user)) {
+        $name = $user['username'] ?? '';
+    }
+    
+    $color = getAvatarColor($name);
+    
+    return '<div class="' . $size . ' rounded-full flex items-center justify-center font-bold text-white ' . $textSize . '" style="background-color: ' . $color . ';">' 
+           . htmlspecialchars($initials) 
+           . '</div>';
+}
+
+/**
+ * Gestionnaire des documents PDF
+ */
+class PDFManager {
+    private static $instance = null;
+    private $config;
+    private $pdfRepository;
+    
+    private function __construct() {
+        $this->config = Config::getInstance();
+        $this->pdfRepository = new PDFRepository();
+    }
+    
+    public static function getInstance(): self {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
+    public function validateAccess(User $user, Book $book): bool {
+        // Vérifier si l'utilisateur a accès au livre
+        if (!$book->getId() || !$user->getId()) {
+            return false;
+        }
+        
+        // Vérifier si le livre a un chemin de fichier
+        $filePath = $book->getFilePath();
+        if (empty($filePath)) {
+            return false;
+        }
+        
+        // Vérifier si le fichier existe et est valide
+        return $this->pdfRepository->validatePath($filePath);
+    }
+    
+    public function getFilePath(Book $book): string {
+        $originalPath = $book->getFilePath();
+        
+        if (empty($originalPath)) {
+            throw new Exception("Le livre n'a pas de fichier PDF associé");
+        }
+        
+        return $this->pdfRepository->resolvePath($originalPath);
+    }
+    
+    public function getMetadata(Book $book): array {
+        try {
+            return $this->pdfRepository->getMetadata($book->getFilePath());
+        } catch (Exception $e) {
+            error_log("Error getting PDF metadata: " . $e->getMessage());
+            return [];
+        }
+    }
+}

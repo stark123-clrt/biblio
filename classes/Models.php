@@ -36,6 +36,24 @@ class User
         }
     }
 
+    public function __get($name)
+{
+    $method = 'get' . str_replace('_', '', ucwords($name, '_'));
+    if (method_exists($this, $method)) {
+        return $this->$method();
+    }
+    
+    // Gérer les noms de propriétés avec underscores (ex: profile_picture)
+    $camelCase = lcfirst(str_replace('_', '', ucwords($name, '_')));
+    $method = 'get' . ucfirst($camelCase);
+    if (method_exists($this, $method)) {
+        return $this->$method();
+    }
+    
+    return null;
+}
+
+
     public function toArray(): array
     {
         return [
@@ -474,6 +492,13 @@ class Book
     {
         return $this->pdfPath;
     }
+    
+    // Alias pour compatibilité avec PDFManager
+    public function getFilePath(): ?string
+    {
+        return $this->pdfPath;
+    }
+    
     public function getPagesCount(): ?int
     {
         return $this->pagesCount;
@@ -562,6 +587,13 @@ class Book
         $this->pdfPath = $pdfPath;
         return $this;
     }
+    
+    // Alias pour compatibilité avec file_path de la base de données
+    public function setFilePath(?string $filePath): self
+    {
+        return $this->setPdfPath($filePath);
+    }
+    
     public function setPagesCount(?int $pagesCount): self
     {
         $this->pagesCount = $pagesCount;
@@ -1419,5 +1451,289 @@ class ReadingHistory
             'finished' => 'from-purple-500 to-purple-600',
             default => 'from-gray-500 to-gray-600'
         };
+    }
+}
+
+
+
+class ForumCategory {
+    public $id;
+    public $name;
+    public $description;
+    public $icon;
+    public $color;
+    public $order_position;
+    public $created_at;
+    public $updated_at;
+    
+    // Propriétés calculées
+    public $topics_count = 0;
+    public $posts_count = 0;
+    public $last_post = null;
+    
+    public function __construct(array $data = []) {
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
+        }
+    }
+}
+
+/**
+ * Classe ForumTopic - Représente un sujet de discussion
+ */
+class ForumTopic {
+    public $id;
+    public $category_id;
+    public $user_id;
+    public $title;
+    public $is_pinned;
+    public $is_locked;
+    public $views_count;
+    public $created_at;
+    public $updated_at;
+    
+    // Relations
+    public $category = null;
+    public $user = null;
+    public $first_post = null;
+    public $last_post = null;
+    
+    // Propriétés calculées
+    public $posts_count = 0;
+    
+    public function __construct(array $data = []) {
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
+        }
+    }
+    
+    public function isPinned(): bool {
+        return (bool)$this->is_pinned;
+    }
+    
+    public function isLocked(): bool {
+        return (bool)$this->is_locked;
+    }
+}
+
+/**
+ * Classe ForumPost - Représente un message dans un topic
+ */
+class ForumPost {
+    public $id;
+    public $topic_id;
+    public $user_id;
+    public $content;
+    public $is_edited;
+    public $edited_at;
+    public $created_at;
+    public $updated_at;
+    
+    // Relations
+    public $topic = null;
+    public $user = null;
+    
+    // Propriétés calculées
+    public $likes_count = 0;
+    public $is_liked_by_current_user = false;
+    
+    public function __construct(array $data = []) {
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
+        }
+    }
+    
+    public function isEdited(): bool {
+        return (bool)$this->is_edited;
+    }
+    
+    public function getFormattedContent(): string {
+        return nl2br(htmlspecialchars($this->content));
+    }
+}
+
+/**
+ * Classe ForumPostLike - Représente un like sur un post
+ */
+class ForumPostLike {
+    public $id;
+    public $post_id;
+    public $user_id;
+    public $created_at;
+    
+    public function __construct(array $data = []) {
+        foreach ($data as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
+        }
+    }
+}
+
+/**
+ * Classe pour gérer une session de lecture d'un livre
+ */
+class ReadingSession {
+    private $id;
+    private $userId;
+    private $bookId;
+    private $currentPage;
+    private $lastAccess;
+    private $bookmarks;
+    private $notes;
+    private $createdAt;
+    private $updatedAt;
+
+    public function __construct(array $data = []) {
+        $this->hydrate($data);
+        $this->bookmarks = $this->bookmarks ?? [];
+        $this->notes = $this->notes ?? [];
+    }
+
+    public function hydrate(array $data): void {
+        foreach ($data as $key => $value) {
+            $method = 'set' . str_replace('_', '', ucwords($key, '_'));
+            if (method_exists($this, $method)) {
+                $this->$method($value);
+            }
+        }
+    }
+
+    // Getters
+    public function getId(): ?int { return $this->id; }
+    public function getUserId(): int { return $this->userId; }
+    public function getBookId(): int { return $this->bookId; }
+    public function getCurrentPage(): int { return $this->currentPage ?? 1; }
+    public function getLastAccess(): ?string { return $this->lastAccess; }
+    public function getBookmarks(): array { return $this->bookmarks; }
+    public function getNotes(): array { return $this->notes; }
+    public function getCreatedAt(): ?string { return $this->createdAt; }
+    public function getUpdatedAt(): ?string { return $this->updatedAt; }
+
+    // Setters
+    public function setId(?int $id): void { $this->id = $id; }
+    public function setUserId(int $userId): void { $this->userId = $userId; }
+    public function setBookId(int $bookId): void { $this->bookId = $bookId; }
+    public function setCurrentPage(int $page): void { $this->currentPage = $page; }
+    public function setLastPageRead(int $page): void { $this->currentPage = $page; } // Alias pour la base de données
+    public function setLastAccess(string $datetime): void { $this->lastAccess = $datetime; }
+    public function setLastReadAt(string $datetime): void { $this->lastAccess = $datetime; } // Alias pour la base de données
+    public function setBookmarks(array $bookmarks): void { $this->bookmarks = $bookmarks; }
+    public function setNotes(array $notes): void { $this->notes = $notes; }
+    public function setCreatedAt(?string $datetime): void { $this->createdAt = $datetime; }
+    public function setUpdatedAt(?string $datetime): void { $this->updatedAt = $datetime; }
+    public function setAddedAt(?string $datetime): void { $this->createdAt = $datetime; } // Alias pour la base de données
+
+    // Méthodes métier
+    public function addBookmark(int $page, string $title): void {
+        $this->bookmarks[] = [
+            'page' => $page,
+            'title' => $title,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+    }
+
+    public function addNote(int $page, string $content): void {
+        $this->notes[] = [
+            'page' => $page,
+            'content' => $content,
+            'created_at' => date('Y-m-d H:i:s')
+        ];
+    }
+
+    public function updateProgress(int $page): void {
+        $this->currentPage = $page;
+        $this->lastAccess = date('Y-m-d H:i:s');
+    }
+}
+
+/**
+ * Classe pour gérer les documents PDF
+ */
+class PDFDocument {
+    private $filePath;
+    private $originalPath;
+    private $metadata;
+    private $pageCount;
+    private $lastError;
+
+    public function __construct(string $path) {
+        $this->originalPath = $path;
+        $this->filePath = $this->resolvePath($path);
+        $this->metadata = [];
+    }
+
+    public function getFilePath(): string {
+        return $this->filePath;
+    }
+
+    public function getPageCount(): int {
+        return $this->pageCount ?? 0;
+    }
+
+    public function getMetadata(): array {
+        return $this->metadata;
+    }
+
+    public function getLastError(): ?string {
+        return $this->lastError;
+    }
+
+    public function isValid(): bool {
+        if (!file_exists($this->filePath)) {
+            $this->lastError = "Fichier PDF introuvable";
+            return false;
+        }
+        return true;
+    }
+
+    private function resolvePath(string $path): string {
+        // Nettoyage du chemin
+        $path = trim($path);
+        
+        // Si le chemin commence par ../
+        if (strpos($path, '../') === 0) {
+            $path = substr($path, 3);
+        }
+        
+        // Vérifier les chemins alternatifs si nécessaire
+        $alternativePaths = [
+            'assets/uploads/books/' . basename($path),
+            '../assets/uploads/books/' . basename($path),
+            $path
+        ];
+        
+        foreach ($alternativePaths as $altPath) {
+            if (file_exists($altPath)) {
+                return $altPath;
+            }
+        }
+        
+        return $path;
+    }
+
+    public function loadMetadata(): bool {
+        if (!$this->isValid()) {
+            return false;
+        }
+
+        try {
+            // TODO: Implémenter la lecture des métadonnées PDF
+            $this->metadata = [
+                'filename' => basename($this->filePath),
+                'filesize' => filesize($this->filePath),
+                'modified' => date('Y-m-d H:i:s', filemtime($this->filePath))
+            ];
+            return true;
+        } catch (Exception $e) {
+            $this->lastError = $e->getMessage();
+            return false;
+        }
     }
 }

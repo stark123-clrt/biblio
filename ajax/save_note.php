@@ -16,18 +16,21 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Récupérer les données JSON
+$input = json_decode(file_get_contents('php://input'), true);
+
 // Vérification des paramètres requis
-if (empty($_POST['book_id']) || empty($_POST['page_number']) || !isset($_POST['note_text'])) {
+if (empty($input['book_id']) || empty($input['page_number']) || !isset($input['content'])) {
     echo json_encode(['success' => false, 'message' => 'Paramètres manquants']);
     exit;
 }
 
 try {
-    $book_id = (int)$_POST['book_id'];
-    $page_number = (int)$_POST['page_number'];
-    $note_text = trim($_POST['note_text']);
+    $book_id = (int)$input['book_id'];
+    $page_number = (int)$input['page_number'];
+    $note_text = trim($input['content']);
     $user_id = $_SESSION['user_id'];
-    $note_id = isset($_POST['note_id']) && !empty($_POST['note_id']) ? (int)$_POST['note_id'] : null;
+    $note_id = isset($input['note_id']) && !empty($input['note_id']) ? (int)$input['note_id'] : null;
 
     // Vérifier si une note existe déjà pour cette page
     if ($note_id === null) {

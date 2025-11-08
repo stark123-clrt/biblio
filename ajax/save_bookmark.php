@@ -18,16 +18,19 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+// Récupérer les données JSON
+$input = json_decode(file_get_contents('php://input'), true);
+
 // Vérifier les paramètres requis
-if (empty($_POST['book_id']) || empty($_POST['page_number'])) {
+if (empty($input['book_id']) || empty($input['page_number'])) {
     echo json_encode(['success' => false, 'message' => 'Paramètres manquants']);
     exit;
 }
 
 try {
-    $book_id = (int)$_POST['book_id'];
-    $page_number = (int)$_POST['page_number'];
-    $bookmark_name = !empty($_POST['bookmark_name']) ? trim($_POST['bookmark_name']) : "Page " . $page_number;
+    $book_id = (int)$input['book_id'];
+    $page_number = (int)$input['page_number'];
+    $bookmark_name = !empty($input['bookmark_name']) ? trim($input['bookmark_name']) : "Page " . $page_number;
     $user_id = $_SESSION['user_id'];
 
     // Vérifier si un marque-page existe déjà pour cette page

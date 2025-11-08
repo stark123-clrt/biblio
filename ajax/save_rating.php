@@ -15,15 +15,18 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-if (!isset($_POST['book_id']) || !isset($_POST['rating'])) {
+// Récupérer les données JSON
+$input = json_decode(file_get_contents('php://input'), true);
+
+if (!isset($input['book_id']) || !isset($input['rating'])) {
     echo json_encode(['success' => false, 'message' => 'Données manquantes']);
     exit;
 }
 
-$book_id = (int)$_POST['book_id'];
+$book_id = (int)$input['book_id'];
 $user_id = $_SESSION['user_id'];
-$rating = (int)$_POST['rating'];
-$comment_text = isset($_POST['comment_text']) ? trim($_POST['comment_text']) : '';
+$rating = (int)$input['rating'];
+$comment_text = isset($input['comment_text']) ? trim($input['comment_text']) : '';
 
 // Validation
 if ($rating < 1 || $rating > 5) {

@@ -32,19 +32,38 @@ try {
     $stmt->bindParam(':book_id', $book_id, PDO::PARAM_INT);
     $stmt->execute();
     
-    // Vérifier si l'utilisateur a déjà une entrée pour cette page
-    $stmt = $conn->prepare("SELECT COUNT(*) FROM reading_history 
+    // Enregistrer dans l'historique (toujours, même si la page existe déjà)
+    // On limite à 1 entrée par page toutes les 5 minutes pour éviter le spam
+    $stmt = $conn->prepare("SELECT id, timestamp FROM reading_history 
                            WHERE user_id = :user_id 
                            AND book_id = :book_id 
                            AND page_number = :page_number 
-                           AND action = 'continued'");
+                           AND action = 'continued'
+                           ORDER BY timestamp DESC 
+                           LIMIT 1");
     $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
     $stmt->bindParam(':book_id', $book_id, PDO::PARAM_INT);
     $stmt->bindParam(':page_number', $page_number, PDO::PARAM_INT);
     $stmt->execute();
     
-    // Si cette page n'a pas encore été enregistrée, l'ajouter à l'historique
-    if ($stmt->fetchColumn() == 0) {
+    $lastEntry = $stmt->fetch(PDO::FETCH_ASSOC);
+    $shouldInsert = false;
+    
+    if (!$lastEntry) {
+        // Aucune entrée pour cette page, on l'ajoute
+        $shouldInsert = true;
+    } else {
+        // Vérifier si la dernière entrée date de plus de 5 minutes
+        $lastTime = strtotime($lastEntry['timestamp']);
+        $now = time();
+        $minutesSinceLastEntry = ($now - $lastTime) / 60;
+        
+        if ($minutesSinceLastEntry >= 5) {
+            $shouldInsert = true;
+        }
+    }
+    
+    if ($shouldInsert) {
         $stmt = $conn->prepare("INSERT INTO reading_history (user_id, book_id, action, page_number) 
                                VALUES (:user_id, :book_id, 'continued', :page_number)");
         $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);

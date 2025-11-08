@@ -131,6 +131,11 @@ try {
     
     // Convertir le chemin pour WSL
 
+
+
+
+    
+
     $wslTempFile = str_replace('\\', '/', str_replace('C:', '/mnt/c', $tempTextFile));
     
     logTTS("Fichier temporaire créé: {$tempTextFile} ({$bytesWritten} bytes)");
@@ -140,13 +145,12 @@ try {
 
     $voiceModel = 'fr-FR-YvesNeural';
 
-    //$voiceModel = 'fr_FR-siwis-low.onnx';  plus rapide moins memoire
-    
-    // Paramètres optimisés pour la qualité et la vitesse
     
     $length_scale = 2.0;   // ← Vitesse normale
-    $noise_scale = 0.5;    // ← Plus d'expression (au lieu de 0.3)
-    $noise_w = 0.9;
+
+    $noise_scale = 0.5;    // ← Plus d'expression
+    
+    $noise_w = 0.9;       // ← Moins de variation
     
 
     // CONSTRUCTION DE LA COMMANDE PIPER

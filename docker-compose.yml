@@ -20,21 +20,6 @@ services:
       - DB_PASS=userpassword
     depends_on:
       - mysql-db
-      - kokoro-tts  # Nouveau dépendance
-    networks:
-      - mynetwork
-
-  # NOUVEAU : Service Kokoro TTS
-  kokoro-tts:
-    build:
-      context: ./python
-      dockerfile: Dockerfile
-    container_name: kokoro-tts
-    volumes:
-      - ./data/audio:/app/audio/
-      - ./data/models:/app/models/
-    environment:
-      - TRANSFORMERS_CACHE=/app/models
     networks:
       - mynetwork
 
