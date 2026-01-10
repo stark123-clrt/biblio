@@ -403,13 +403,9 @@ function getCorrectImagePath($imagePath, $basePath) {
                        class="nav-link px-4 py-2 font-medium hover:text-blue-100 dark:hover:text-blue-200 relative transition-smooth <?php echo ($current_page == 'index.php') ? 'text-white' : 'text-blue-100' ?>">
                         Accueil
                     </a>
-                    <a href="<?php echo $base_path; ?>library.php" 
+                    <a href="<?php echo $base_path; ?>library.php"
                        class="nav-link px-4 py-2 font-medium hover:text-blue-100 dark:hover:text-blue-200 relative transition-smooth <?php echo ($current_page == 'library.php') ? 'text-white' : 'text-blue-100' ?>">
                         Bibliothèque
-                    </a>
-                    <a href="<?php echo $base_path; ?>forum.php" 
-                       class="nav-link px-4 py-2 font-medium hover:text-blue-100 dark:hover:text-blue-200 relative transition-smooth <?php echo ($current_page == 'forum.php' || $current_page == 'forum_category.php' || $current_page == 'forum_topic.php') ? 'text-white' : 'text-blue-100' ?>">
-                        Forum
                     </a>
                     <a href="<?php echo $base_path; ?>testimonials.php" 
                        class="nav-link px-4 py-2 font-medium hover:text-blue-100 dark:hover:text-blue-200 relative transition-smooth <?php echo ($current_page == 'testimonials.php') ? 'text-white' : 'text-blue-100' ?>">
@@ -553,15 +549,9 @@ function getCorrectImagePath($imagePath, $basePath) {
                         </a>
                     </li>
                     <li>
-                        <a href="<?php echo $base_path; ?>library.php" 
+                        <a href="<?php echo $base_path; ?>library.php"
                            class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-smooth font-medium <?php echo ($current_page == 'library.php') ? 'bg-white bg-opacity-10' : '' ?>">
                             <i class="fas fa-book mr-3"></i> Bibliothèque
-                        </a>
-                    </li>
-                    <li>
-                        <a href="<?php echo $base_path; ?>forum.php" 
-                           class="block px-4 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-smooth font-medium <?php echo ($current_page == 'forum.php' || $current_page == 'forum_category.php' || $current_page == 'forum_topic.php') ? 'bg-white bg-opacity-10' : '' ?>">
-                            <i class="fas fa-comments mr-3"></i> Forum
                         </a>
                     </li>
                     <li>
